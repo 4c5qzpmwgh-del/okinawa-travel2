@@ -37,7 +37,7 @@
         .item-row.checked .checkbox-custom::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: white; font-size: 11px; }
         .item-name { font-size: 14px; color: var(--text); font-weight: 500; padding-right: 40px; }
         .item-row.checked .item-name { color: #94a3b8; text-decoration: line-through; }
-        .item-note { font-size: 12px; color: #a1a1aa; margin-left: auto; padding-right: 35px; font-style: italic; }
+        .item-note { font-size: 12px; color: #a1a1aa; margin-left: auto; padding-right: 45px; font-style: italic; text-align: right; }
         .item-row.checked .item-note { color: #cbd5e1; }
         .btn-item-del { position: absolute; right: 0; top: 10px; background: #fee2e2; border: none; color: #ef4444; cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; z-index: 10; }
         .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
@@ -54,11 +54,11 @@
     <div class="add-box-card">
         <div class="form-title"><i class="fas fa-plus-circle"></i> 新增自訂物品至指定清單</div>
         <div class="form-grid">
-            <input type="text" id="itemName" placeholder="例如：萬用插頭、防水相機...">
+            <input type="text" id="itemName" placeholder="例如：萬用插頭、行動電源...">
             <select id="itemCat">
                 <option value="🪪 必備重要證件 (漏了絕對出不了關)">重要證件</option>
                 <option value="🚗 自駕與數位裝備">數位裝備</option>
-                <option value="🏊‍♂️ 沖繩海灘與水水上活動">水上活動</option>
+                <option value="🏊‍♂️ 沖繩海灘與水上活動">水上活動</option>
             </select>
             <button class="btn-form-add" onclick="addItem()">新增</button>
         </div>
@@ -68,7 +68,7 @@
     <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
 <script>
-    // 固定的基礎必須清單
+    // 📍 完全保留您原汁原味的預設清單內容
     const defaultPacking = {
         "🪪 必備重要證件 (漏了絕對出不了關)": [
             { id: "p1", name: "台灣駕照正本", note: "自駕靈魂！沒帶取不了車" },
@@ -79,10 +79,10 @@
         "🚗 自駕與數位裝備": [
             { id: "p5", name: "手機車用支架", note: "看 Google Maps 超方便" },
             { id: "p6", name: "車充 / USB 充電線", note: "自駕導航手機必備補血" },
-            { id: "p7", name: "隨身 Wi-Fi 或 eSIM", note: "自駕路網不能斷" },
+            { id: "p7", name: "隨身 Wi-Fi 或 eSIM", note: "自駕查路絕對不能斷網" },
             { id: "p8", name: "行動電源", note: "海灘拍照一整天必備" }
         ],
-        "🏊‍♂️ 沖繩海灘與水水上活動": [
+        "🏊‍♂️ 沖繩海灘與水上活動": [
             { id: "p9", name: "泳衣 / 泳褲 / 水母衣", note: "青之洞窟浮潛必備" },
             { id: "p10", name: "防水袋 / 手機防水殼", note: "海邊戲水防沙防海水" },
             { id: "p11", name: "海洋友善防曬乳", note: "保護沖繩美麗的珊瑚礁" },
@@ -121,17 +121,12 @@
             if (displayData[item.cat]) {
                 displayData[item.cat].push(item);
             } else {
-                // 防呆：如果分類對不上，統一塞入水上活動
-                displayData["🏊‍♂️ 沖繩海灘與水水上活動"].push(item);
+                displayData["🏊‍♂️ 沖繩海灘與水上活動"].push(item);
             }
         });
 
         for (const [cat, items] of Object.entries(displayData)) {
-            // 修正分類顯示字樣，使其符合設計
-            let displayCatTitle = cat;
-            if(cat === "🏊‍♂️ 沖繩海灘與水水上活動") displayCatTitle = "🏊‍♂️ 沖繩海灘與水上活動";
-
-            html += `<div class="cat-card"><div class="cat-title">${displayCatTitle}</div>`;
+            html += `<div class="cat-card"><div class="cat-title">${cat}</div>`;
             items.forEach(item => {
                 const isChecked = checkedItems.includes(item.name);
                 const isCustom = item.id && item.id.toString().startsWith('c_');
@@ -164,7 +159,7 @@
 
         customPackingList.push(newItem);
         
-        // 同步推送至 Supabase 雲端
+        // 同步至 Supabase 雲端
         const { error } = await supabase.from('trip_settings').upsert({ id: 1, custom_packing: customPackingList });
         if(!error) {
             document.getElementById('itemName').value = '';
