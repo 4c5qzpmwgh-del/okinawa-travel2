@@ -21,6 +21,8 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #333; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
         .selector-section { padding: 20px; }
+        .custom-add-box { background: #fffbeb; border: 1px dashed #ea580c; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .custom-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 8px; }
         .city-accordion { margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
         .city-header { padding: 12px; background: #f1f5f9; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; color: #b71c1c; }
         .city-content { display: none; padding: 15px; max-height: 500px; overflow-y: auto; }
@@ -29,34 +31,31 @@
         .spot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top:10px; }
         .spot-item { padding: 30px 8px 10px; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; text-align: center; transition: 0.2s; position: relative; background: #fff; }
         .spot-item.active { border-color: var(--secondary); background: #fff7ed; font-weight: bold; border-width: 2px; }
-        .spot-item.full-day { border-color: #8b5cf6; background: #faf5ff; } 
-        .fd-toggle-btn { position: absolute; top: 6px; left: 6px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background: #e2e8f0; color: #64748b; font-weight: bold; }
-        .fd-toggle-btn.is-full { background: #8b5cf6; color: #fff; }
+        .btn-spot-del { position: absolute; top: 4px; right: 4px; background: #fee2e2; color: #ef4444; border: none; font-size: 9px; padding: 2px 4px; border-radius: 4px; cursor: pointer; z-index: 5; }
+        .fd-toggle-btn { position: absolute; top: 6px; left: 6px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background: #e2e8f0; color: #64748b; }
         .btn-main { width: 100%; padding: 15px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
         .result-container { padding: 20px; display: none; }
         .day-block { margin-bottom: 30px; border: 1px solid #e2e8f0; border-radius: 10px; }
         .day-header { padding: 12px 15px; background: #333; color: white; font-weight: bold; border-radius: 10px 10px 0 0; }
         .timeline { padding: 20px; position: relative; padding-left: 45px; }
         .timeline::before { content: ''; position: absolute; left: 24px; top: 20px; bottom: 20px; width: 3px; background: #cbd5e1; }
-        .node { position: relative; margin-bottom: 25px; padding: 15px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; }
-        .node.is-full-day { background: #f3e8ff; border-color: #d8b4fe; } 
+        .node { position: relative; margin-bottom: 25px; padding: 15px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
+        .node:hover { background: #f8fafc; border-color: #cbd5e1; }
         .node::before { content: ''; position: absolute; left: -28px; top: 20px; width: 14px; height: 14px; background: #fff; border: 4px solid var(--secondary); border-radius: 50%; z-index: 2; }
         .node-time { font-size: 14px; font-weight: bold; color: #475569; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 8px;}
         .node-title { font-size: 16px; font-weight: bold; color: #0f172a; margin-bottom: 5px; }
         .status-tag { font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; display: inline-block; }
         .status-ok { background: #dcfce7; color: #166534; }
-        .status-warn { background: #fee2e2; color: #991b1b; }
         .transit { font-size: 12px; color: #64748b; margin: 15px 0 15px 10px; font-weight: bold; }
         .node-ctrl { display: flex; gap: 5px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; }
         .c-btn { border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
-        .unassigned-alert { background: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <header>
         <h2 style="margin:0;"><i class="fas fa-shuttle-van"></i> 沖繩自駕行程神隊友</h2>
-        <p style="margin:5px 0 0; font-size:13px; opacity:0.9;">那霸基地自駕縱跨線路排程系統</p>
+        <p style="margin:5px 0 0; font-size:13px; opacity:0.9;">點擊產生後的行程卡片可直接導航至 Google 地圖</p>
     </header>
     <div class="form-section">
         <div class="form-group"><label>航班抵達 (OKA)</label><input type="time" id="arrTime" value="11:50"></div>
@@ -71,6 +70,22 @@
         <div class="form-group"><label>總天數</label><input type="number" id="days" value="5" min="1" max="15"></div>
     </div>
     <div class="selector-section">
+        <!-- 自由新增自訂景點表單 -->
+        <div class="custom-add-box">
+            <div style="font-size:14px; font-weight:bold; color:#ea580c; margin-bottom:8px;"><i class="fas fa-map-pin"></i> 新增自訂私房景點</div>
+            <div class="custom-grid">
+                <input type="text" id="cName" placeholder="景點名稱 (必填)">
+                <select id="cRegion">
+                    <option value="北部地區 (名護/本部)">北部地區</option>
+                    <option value="中部地區 (恩納/美國村)">中部地區</option>
+                    <option value="南部地區 (那霸/瀨長島)">南部地區</option>
+                </select>
+                <input type="number" id="cStay" placeholder="停留小時 (如: 1.5)" step="0.5">
+                <input type="text" id="cMapUrl" placeholder="🔗 貼上 Google 地圖網址 (選填)">
+            </div>
+            <button onclick="addCustomSpot()" style="padding:6px 12px; background:#ea580c; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ 新增至下方清單</button>
+        </div>
+
         <div id="accordion"></div>
         <button class="btn-main" onclick="initPlanner()">✨ 開始智慧自駕排程 (沖繩縱貫線)</button>
         <button id="btnCloud" class="btn-main" style="background: #059669; margin-top: 10px;" onclick="saveToCloud()">💾 同步到雲端 (存檔)</button>
@@ -78,201 +93,193 @@
     <div class="result-container" id="resultArea"></div>
 </div>
 <script>
-const masterDB = {
-    "北部地區 (名護/本部)": {
-        "經典必去景點": [
-            {name:"美麗海水族館", stay:3.5, open:"08:30", close:"18:30", city:"北部", fullDay:false},
-            {name:"古宇利大橋/心形岩", stay:2, open:"00:00", close:"23:59", city:"北部", fullDay:false},
-            {name:"萬座毛", stay:1, open:"08:00", close:"19:00", city:"北部", fullDay:false},
-            {name:"名護鳳梨園", stay:1.5, open:"10:00", close:"17:00", city:"北部", fullDay:false}
-        ]
-    },
-    "中部地區 (恩納/美國村)": {
-        "休閒與逛街商圈": [
-            {name:"美國村 Depot Island", stay:3, open:"10:00", close:"22:00", city:"中部", fullDay:false},
-            {name:"殘波岬燈塔", stay:1, open:"09:00", close:"17:30", city:"中部", fullDay:false},
-            {name:"永旺夢樂城來客夢", stay:4, open:"10:00", close:"22:00", city:"中部", fullDay:false},
-            {name:"青之洞窟潛水", stay:3, open:"08:00", close:"17:00", city:"中部", fullDay:false}
-        ]
-    },
-    "南部地區 (那霸/瀨長島)": {
-        "古蹟與免稅購物": [
-            {name:"國際通商圈", stay:2.5, open:"11:00", close:"23:00", city:"南部", fullDay:false},
-            {name:"瀨長島 Umikaji Terrace", stay:2, open:"10:00", close:"21:00", city:"南部", fullDay:false},
-            {name:"首里城公園", stay:2, open:"08:30", close:"18:00", city:"南部", fullDay:false},
-            {name:"沖繩世界文化王國", stay:3, open:"09:00", close:"17:30", city:"南部", fullDay:false},
-            {name:"ASHIBINAA Outlet", stay:3, open:"10:00", close:"20:00", city:"南部", fullDay:false}
-        ]
+    const masterDB = {
+        "北部地區 (名護/本部)": { "經典必去景點": [ {name:"美麗海水族館", stay:3.5, open:"08:30", close:"18:30", city:"北部", mapUrl:""}, {name:"古宇利大橋/心形岩", stay:2, open:"00:00", close:"23:59", city:"北部", mapUrl:""}, {name:"萬座毛", stay:1, open:"08:00", close:"19:00", city:"北部", mapUrl:""} ] },
+        "中部地區 (恩納/美國村)": { "休閒與逛街商圈": [ {name:"美國村 Depot Island", stay:3, open:"10:00", close:"22:00", city:"中部", mapUrl:""}, {name:"殘波岬燈塔", stay:1, open:"09:00", close:"17:30", city:"中部", mapUrl:""}, {name:"蝦蝦飯 Kouri Shrimp", stay:1.5, open:"11:00", close:"18:00", city:"中部", mapUrl:""} ] },
+        "南部地區 (那霸/瀨長島)": { "古蹟與免稅購物": [ {name:"國際通商圈", stay:2.5, open:"11:00", close:"23:00", city:"南部", mapUrl:""}, {name:"瀨長島 Umikaji Terrace", stay:2, open:"10:00", close:"21:00", city:"南部", mapUrl:""}, {name:"首里城公園", stay:2, open:"08:30", close:"18:00", city:"南部", mapUrl:""} ] }
+    };
+
+    let userCustomSpots = JSON.parse(localStorage.getItem('okinawa_custom_spots')) || [];
+    let selectedSet = new Set();
+    let scheduledDays = []; 
+    let config = {};
+
+    function addCustomSpot() {
+        const name = document.getElementById('cName').value.trim();
+        if(!name) return alert('請輸入景點名稱！');
+        const region = document.getElementById('cRegion').value;
+        const stay = parseFloat(document.getElementById('cStay').value) || 1.0;
+        const mapUrl = document.getElementById('cMapUrl').value.trim();
+
+        const newSpot = { name, stay, open:"09:00", close:"21:00", city: region.substring(0,2), mapUrl, isCustom: true, id: Date.now() };
+        userCustomSpots.push(newSpot);
+        localStorage.setItem('okinawa_custom_spots', JSON.stringify(userCustomSpots));
+        
+        document.getElementById('cName').value = '';
+        document.getElementById('cStay').value = '';
+        document.getElementById('cMapUrl').value = '';
+        renderSelection();
     }
-};
 
-let selectedSet = new Set();
-let scheduledDays = []; 
-let config = {};
-
-function renderSelection() {
-    const target = document.getElementById('accordion');
-    target.innerHTML = '';
-    for (const [region, categories] of Object.entries(masterDB)) {
-        const div = document.createElement('div'); div.className = 'city-accordion';
-        div.innerHTML = `<div class="city-header" onclick="this.nextElementSibling.classList.toggle('active')"><span>${region}</span> <i class="fas fa-chevron-down"></i></div>`;
-        const content = document.createElement('div'); content.className = 'city-content';
-        for (const [catName, spots] of Object.entries(categories)) {
-            const catTitle = document.createElement('div'); catTitle.className = 'cat-title'; catTitle.innerText = catName;
-            content.appendChild(catTitle);
-            const grid = document.createElement('div'); grid.className = 'spot-grid';
-            spots.forEach(s => {
-                const item = document.createElement('div'); 
-                item.className = `spot-item ${s.fullDay ? 'full-day' : ''}`;
-                const badge = document.createElement('div');
-                badge.className = `fd-toggle-btn ${s.fullDay ? 'is-full' : ''}`;
-                badge.innerHTML = s.fullDay ? '<i class="fas fa-crown"></i> 全日專屬' : '<i class="far fa-clock"></i> 依時數';
-                badge.onclick = (e) => {
-                    e.stopPropagation(); s.fullDay = !s.fullDay; 
-                    badge.className = `fd-toggle-btn ${s.fullDay ? 'is-full' : ''}`;
-                    item.classList.toggle('full-day', s.fullDay);
-                };
-                const info = document.createElement('div');
-                info.innerHTML = `<div>${s.name}</div><div style="font-size:10px; color:#888; margin-top:3px;">${s.open}-${s.close} (${s.stay}h)</div>`;
-                item.onclick = () => { item.classList.toggle('active'); selectedSet.has(s) ? selectedSet.delete(s) : selectedSet.add(s); };
-                item.appendChild(badge); item.appendChild(info); grid.appendChild(item);
-            });
-            content.appendChild(grid);
-        }
-        div.appendChild(content); target.appendChild(div);
-    }
-}
-
-function t2m(t) { let [h, m] = t.split(':').map(Number); return h * 60 + m; }
-function m2t(m) { let h = Math.floor(m / 60) % 24; let min = Math.round(m % 60); return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`; }
-
-function getTransitMins(fromLoc, toLoc) {
-    if (fromLoc === "機場" || toLoc === "機場") return 40;
-    if (fromLoc === toLoc) return 20; 
-    const map = { "南部-中部": 45, "中部-南部": 45, "中部-北部": 50, "北部-中部": 50, "南部-北部": 80, "北部-南部": 80 };
-    return map[`${fromLoc}-${toLoc}`] || 30; 
-}
-
-function initPlanner() {
-    if(selectedSet.size === 0) return alert("請勾選想去的景點！");
-    config = { arr: document.getElementById('arrTime').value, dep: document.getElementById('depTime').value, hotel: document.getElementById('hotel').value, days: parseInt(document.getElementById('days').value) };
-    let spots = Array.from(selectedSet).map(s => ({...s}));
-    let fullDaySpots = spots.filter(s => s.fullDay);
-    let normalSpots = spots.filter(s => !s.fullDay);
-normalSpots.sort((a, b) => a.city.localeCompare(b.city));
-    scheduledDays = Array.from({length: config.days}, () => []);
-    let unassigned = [];
-    for (let i = 0; i < config.days; i++) {
-        let currentMins = (i === 0) ? t2m(config.arr) + 60 : t2m("09:00");
-        let dayLimit = (i === config.days - 1) ? t2m(config.dep) - 150 : t2m("20:30"); 
-        let currentLoc = (i === 0) ? "機場" : "南部";
-        let spotIdx = 0;
-        while (spotIdx < normalSpots.length) {
-            let spot = normalSpots[spotIdx];
-            let transit = getTransitMins(currentLoc, spot.city);
-            let arrivalMins = currentMins + transit;
-            if (arrivalMins < t2m(spot.open)) arrivalMins = t2m(spot.open);
-            let endMins = arrivalMins + (spot.stay * 60);
-            if (endMins <= dayLimit && arrivalMins < t2m(spot.close)) {
-                scheduledDays[i].push(spot);
-                currentMins = endMins; currentLoc = spot.city; normalSpots.splice(spotIdx, 1); 
-            } else { spotIdx++; }
+    function deleteCustomSpot(id, e) {
+        e.stopPropagation();
+        if(confirm('確定移除此自訂景點嗎？')) {
+            userCustomSpots = userCustomSpots.filter(s => s.id !== id);
+            localStorage.setItem('okinawa_custom_spots', JSON.stringify(userCustomSpots));
+            renderSelection();
         }
     }
-    unassigned = unassigned.concat(normalSpots);
-    document.getElementById('resultArea').style.display = 'block';
-    renderResult(unassigned);
-}
 
-function adjust(d, s, val) { scheduledDays[d][s].stay = Math.max(0.5, scheduledDays[d][s].stay + val); renderResult(); }
-function move(d, s, dir) { 
-    if(s+dir < 0 || s+dir >= scheduledDays[d].length) return;
-    [scheduledDays[d][s], scheduledDays[d][s+dir]] = [scheduledDays[d][s+dir], scheduledDays[d][s]]; 
-    renderResult(); 
-}
-function del(d, s) { scheduledDays[d].splice(s, 1); renderResult(); }
-
-function renderResult(unassigned = []) {
-    const target = document.getElementById('resultArea');
-    let html = '<h3><i class="fas fa-clipboard-check"></i> 沖繩自駕行程表</h3>';
-    if (unassigned && unassigned.length > 0) {
-        let names = unassigned.map(s => s.name).join('、');
-        html += `<div class="unassigned-alert"><i class="fas fa-exclamation-triangle"></i> 自駕線路太滿塞不下：<br><span>${names}</span></div>`;
-    }
-    for (let d = 0; d < config.days; d++) {
-        html += `<div class="day-block"><div class="day-header">第 ${d+1} 天</div><div class="timeline">`;
-        let now = (d === 0) ? t2m(config.arr) + 60 : t2m("09:00");
-        let loc = (d === 0) ? "機場" : "南部";
-        if (d === 0) html += `<div class="node"><div class="node-time">${m2t(now)}</div><div class="node-title">🚗 OKA 機場取車自駕出發</div></div>`;
-        scheduledDays[d].forEach((spot, sIdx) => {
-            let trans = getTransitMins(loc, spot.city); now += trans; 
-            html += `<div class="transit"><i class="fas fa-car"></i> 導航行駛自駕前往 ${spot.name} (約 ${trans} 分鐘)</div>`;
-            let open = t2m(spot.open), close = t2m(spot.close);
-            if(now < open) { now = open; }
-            let end = now + (spot.stay * 60);
-            let isWarn = (end > close && spot.close !== "23:59");
-            html += `
-                <div class="node">
-                    <div class="node-time">${m2t(now)} - ${m2t(end)}</div>
-                    <div class="node-title">${spot.name}</div>
-                    <div class="status-tag ${isWarn?'status-warn':'status-ok'}">${isWarn?'⚠️ 超過打烊':'✅ 營業中'}</div>
-                    <div class="node-ctrl">
-                        <button class="c-btn" onclick="adjust(${d}, ${sIdx}, -0.5)">-30m</button>
-                        <span style="font-size:12px; font-weight:bold; margin:0 5px;">停留 ${spot.stay}h</span>
-                        <button class="c-btn" onclick="adjust(${d}, ${sIdx}, 0.5)">+30m</button>
-                        <button class="c-btn" onclick="move(${d}, ${sIdx}, -1)">↑</button>
-                        <button class="c-btn" onclick="move(${d}, ${sIdx}, 1)">↓</button>
-                        <button class="c-btn" onclick="del(${d}, ${sIdx})" style="color:red;">刪除</button>
-                    </div>
-                </div>
-            `;
-            now = end; loc = spot.city;
+    function renderSelection() {
+        const target = document.getElementById('accordion');
+        target.innerHTML = '';
+        
+        // 複製一份結構來塞自訂景點
+        let displayDB = JSON.parse(JSON.stringify(masterDB));
+        userCustomSpots.forEach(s => {
+            const key = Object.keys(displayDB).find(k => k.startsWith(s.city));
+            if(key) {
+                if(!displayDB[key]["自訂私房景點"]) displayDB[key]["自訂私房景點"] = [];
+                displayDB[key]["自訂私房景點"].push(s);
+            }
         });
-        html += `</div></div>`;
-    }
-    target.innerHTML = html;
-}
 
-async function saveToCloud() {
-    const btn = document.getElementById('btnCloud');
-    btn.innerText = "正在儲存...";
-    const selectedArray = Array.from(selectedSet);
-    await sb.from('saved_itinerary').upsert({
-        id: '99999999-9999-9999-9999-999999999999',
-        config: config,
-        selected_spots: selectedArray,
-        schedule: scheduledDays
-    });
-    alert("✅ 沖繩行程已同步至雲端！");
-    btn.innerText = "💾 同步到雲端 (存檔)";
-}
+        for (const [region, categories] of Object.entries(displayDB)) {
+            const div = document.createElement('div'); div.className = 'city-accordion';
+            div.innerHTML = `<div class="city-header" onclick="this.nextElementSibling.classList.toggle('active')"><span>${region}</span> <i class="fas fa-chevron-down"></i></div>`;
+            const content = document.createElement('div'); content.className = 'city-content';
+            for (const [catName, spots] of Object.entries(categories)) {
+                if(spots.length === 0) continue;
+                const catTitle = document.createElement('div'); catTitle.className = 'cat-title'; catTitle.innerText = catName;
+                content.appendChild(catTitle);
+                const grid = document.createElement('div'); grid.className = 'spot-grid';
+                spots.forEach(s => {
+                    const item = document.createElement('div'); 
+                    item.className = 'spot-item';
+                    
+                    // 如果是自訂，加刪除按鈕
+                    if(s.isCustom) {
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'btn-spot-del';
+                        delBtn.innerText = '❌';
+                        delBtn.onclick = (e) => deleteCustomSpot(s.id, e);
+                        item.appendChild(delBtn);
+                    }
 
-async function loadFromCloud() {
-    const { data } = await sb.from('saved_itinerary').select('*').eq('id', '99999999-9999-9999-9999-999999999999').single();
-    if (data) {
-        config = data.config || {};
-        selectedSet = new Set(data.selected_spots);
-        restoreUI();
-        if (data.schedule && data.schedule.length > 0) {
-            scheduledDays = data.schedule;
-            document.getElementById('resultArea').style.display = 'block';
-            renderResult();
+                    const info = document.createElement('div');
+                    info.innerHTML = `<div>${s.name}</div><div style="font-size:10px; color:#888; margin-top:3px;">停留 ${s.stay}h</div>`;
+                    
+                    // 點擊選取邏輯
+                    let isSelected = Array.from(selectedSet).some(sel => sel.name === s.name);
+                    if(isSelected) item.classList.add('active');
+                    
+                    item.onclick = () => { 
+                        item.classList.toggle('active'); 
+                        let found = Array.from(selectedSet).find(sel => sel.name === s.name);
+                        if(found) selectedSet.delete(found); else selectedSet.add(s);
+                    };
+                    item.appendChild(info); grid.appendChild(item);
+                });
+                content.appendChild(grid);
+            }
+            div.appendChild(content); target.appendChild(div);
         }
     }
-}
 
-function restoreUI() {
-    const items = document.querySelectorAll('.spot-item');
-    items.forEach(item => {
-        const titleEl = item.querySelector('div:last-child div:first-child');
-        if(!titleEl) return;
-        for (let s of selectedSet) {
-            if (s.name === titleEl.innerText) { item.classList.add('active'); break; }
+    function t2m(t) { let [h, m] = t.split(':').map(Number); return h * 60 + m; }
+    function m2t(m) { let h = Math.floor(m / 60) % 24; let min = Math.round(m % 60); return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`; }
+    function getTransitMins(f, t) { return f===t ? 20 : 45; }
+
+    function initPlanner() {
+        if(selectedSet.size === 0) return alert("請勾選想去的景點！");
+        config = { arr: document.getElementById('arrTime').value, dep: document.getElementById('depTime').value, hotel: document.getElementById('hotel').value, days: parseInt(document.getElementById('days').value) };
+        let spots = Array.from(selectedSet).map(s => ({...s}));
+        scheduledDays = Array.from({length: config.days}, () => []);
+        
+        for (let i = 0; i < config.days; i++) {
+            let currentMins = (i === 0) ? t2m(config.arr) + 60 : t2m("09:00");
+            let dayLimit = (i === config.days - 1) ? t2m(config.dep) - 150 : t2m("20:30"); 
+            let currentLoc = (i === 0) ? "機" : "南";
+            let spotIdx = 0;
+            while (spotIdx < spots.length) {
+                let spot = spots[spotIdx];
+                let transit = getTransitMins(currentLoc, spot.city);
+                let arrivalMins = currentMins + transit;
+                let endMins = arrivalMins + (spot.stay * 60);
+                if (endMins <= dayLimit) {
+                    scheduledDays[i].push(spot);
+                    currentMins = endMins; currentLoc = spot.city; spots.splice(spotIdx, 1); 
+                } else { spotIdx++; }
+            }
         }
-    });
-}
+        document.getElementById('resultArea').style.display = 'block';
+        renderResult();
+    }
 
-window.onload = async () => { renderSelection(); await loadFromCloud(); };
+    function adjust(d, s, val) { scheduledDays[d][s].stay = Math.max(0.5, scheduledDays[d][s].stay + val); renderResult(); }
+    function move(d, s, dir) { 
+        if(s+dir < 0 || s+dir >= scheduledDays[d].length) return;
+        [scheduledDays[d][s], scheduledDays[d][s+dir]] = [scheduledDays[d][s+dir], scheduledDays[d][s]]; 
+        renderResult(); 
+    }
+    function del(d, s) { scheduledDays[d].splice(s, 1); renderResult(); }
+
+    function openMap(name, customUrl) {
+        const url = customUrl ? customUrl : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' 沖繩')}`;
+        window.open(url, '_blank');
+    }
+
+    function renderResult() {
+        const target = document.getElementById('resultArea');
+        let html = '<h3><i class="fas fa-clipboard-check"></i> 沖繩自駕行程表 (點擊卡片可開啟導航)</h3>';
+        for (let d = 0; d < config.days; d++) {
+            html += `<div class="day-block"><div class="day-header">第 ${d+1} 天</div><div class="timeline">`;
+            let now = (d === 0) ? t2m(config.arr) + 60 : t2m("09:00");
+            let loc = (d === 0) ? "機" : "南";
+            if (d === 0) html += `<div class="node" onclick="openMap('那霸機場','')"><div class="node-time">${m2t(now)}</div><div class="node-title">🚗 OKA 機場取車自駕出發</div></div>`;
+            scheduledDays[d].forEach((spot, sIdx) => {
+                let trans = getTransitMins(loc, spot.city); now += trans; 
+                html += `<div class="transit"><i class="fas fa-car"></i> 自駕前往下個點 (約 ${trans} 分鐘)</div>`;
+                let end = now + (spot.stay * 60);
+                html += `
+                    <div class="node" onclick="openMap('${spot.name}', '${spot.mapUrl || ''}')">
+                        <div class="node-time">${m2t(now)} - ${m2t(end)}</div>
+                        <div class="node-title"><i class="fas fa-map-marker-alt" style="color:#ea580c;margin-right:5px;"></i>${spot.name}</div>
+                        <div class="status-tag status-ok">🗺️ 點擊開啟地圖導航</div>
+                        <div class="node-ctrl" onclick="event.stopPropagation()">
+                            <button class="c-btn" onclick="adjust(${d}, ${sIdx}, -0.5)">-30m</button>
+                            <span style="font-size:12px; font-weight:bold; margin:0 5px;">停留 ${spot.stay}h</span>
+                            <button class="c-btn" onclick="adjust(${d}, ${sIdx}, 0.5)">+30m</button>
+                            <button class="c-btn" onclick="move(${d}, ${sIdx}, -1)">↑</button>
+                            <button class="c-btn" onclick="move(${d}, ${sIdx}, 1)">↓</button>
+                            <button class="c-btn" onclick="del(${d}, ${sIdx})" style="color:red;">刪除</button>
+                        </div>
+                    </div>
+                `;
+                now = end; loc = spot.city;
+            });
+            html += `</div></div>`;
+        }
+        target.innerHTML = html;
+    }
+
+    async function saveToCloud() {
+        const btn = document.getElementById('btnCloud'); btn.innerText = "正在儲存...";
+        await sb.from('saved_itinerary').upsert({ id: '99999999-9999-9999-9999-999999999999', config, selected_spots: Array.from(selectedSet), schedule: scheduledDays });
+        alert("✅ 行程已同步至雲端！"); btn.innerText = "💾 同步到雲端 (存檔)";
+    }
+
+    async function loadFromCloud() {
+        const { data } = await sb.from('saved_itinerary').select('*').eq('id', '99999999-9999-9999-9999-999999999999').single();
+        if (data) {
+            config = data.config || {};
+            selectedSet = new Set(data.selected_spots);
+            renderSelection();
+            if (data.schedule && data.schedule.length > 0) { scheduledDays = data.schedule; document.getElementById('resultArea').style.display = 'block'; renderResult(); }
+        }
+    }
+
+    window.onload = async () => { renderSelection(); await loadFromCloud(); };
 </script>
 </body>
 </html>
