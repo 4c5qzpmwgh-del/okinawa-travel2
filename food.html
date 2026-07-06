@@ -107,11 +107,27 @@
         { id: "d6", name: "蝦蝦飯 Kouri Shrimp", type: "沖繩麵與在地", cat: "評價推薦", area: "古宇利島", price: 1500, desc: "古宇利島爆紅夏威夷蒜香蝦飯，搭上海景超級對味", weight: 2, mapUrl: "" }
     ];
 
-    // 從本地快取加載用戶自訂的美食，避免重新整理後消失
-    let customFoodDB = JSON.parse(localStorage.getItem('okinawa_custom_food')) || [];
+    let customFoodDB = [];
     let currentCat = '全部';
 
-    function customAddFood() {
+    // 網頁開啟時，自動去雲端抓取大家新增的美食
+    window.onload = async () => {
+        await loadCloudFood();
+        // 啟動即時監聽：旅伴一加，你不用重新整理網頁也會立刻跳出來！
+        supabase.channel('food_realtime').on('postgres_changes', { event: '*', table: 'trip_settings' }, () => {
+            loadCloudFood();
+        }).subscribe();
+    };
+
+    async function loadCloudFood() {
+        const { data } = await supabase.from('trip_settings').select('custom_food').eq('id', 1).single();
+        if (data && data.custom_food) {
+            customFoodDB = data.custom_food;
+        }
+        renderFood();
+    }
+
+    async function customAddFood() {
         const name = document.getElementById('addName').value.trim();
         if(!name) return alert('請輸入餐廳名稱！');
         
@@ -128,24 +144,27 @@
         };
 
         customFoodDB.push(newFood);
-        localStorage.setItem('okinawa_custom_food', JSON.stringify(customFoodDB));
         
-        // 清空輸入框
-        document.getElementById('addName').value = '';
-        document.getElementById('addArea').value = '';
-        document.getElementById('addPrice').value = '';
-        document.getElementById('addDesc').value = '';
-        document.getElementById('addMapUrl').value = '';
-
-        renderFood();
+        // 儲存上雲端
+        const { error } = await supabase.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
+        if(!error) {
+            alert('🛍️ 美食已同步至雲端，全員可見！');
+            document.getElementById('addName').value = '';
+            document.getElementById('addArea').value = '';
+            document.getElementById('addPrice').value = '';
+            document.getElementById('addDesc').value = '';
+            document.getElementById('addMapUrl').value = '';
+            renderFood();
+        } else {
+            alert('儲存失敗：' + error.message);
+        }
     }
 
-    function deleteFood(id, e) {
-        e.preventDefault();
-        e.stopPropagation(); // 防止觸發卡片點擊事件
-        if(confirm('確定要刪除此項目嗎？')) {
+    async function deleteFood(id, e) {
+        e.preventDefault(); e.stopPropagation();
+        if(confirm('確定要從雲端刪除此項目嗎？（所有人畫面的此項目都會消失喔）')) {
             customFoodDB = customFoodDB.filter(item => item.id !== id);
-            localStorage.setItem('okinawa_custom_food', JSON.stringify(customFoodDB));
+            await supabase.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
             renderFood();
         }
     }
@@ -165,7 +184,6 @@
         const listEl = document.getElementById('foodList');
         const sortBy = document.getElementById('sortSelect').value;
         
-        // 合併預設與用戶自訂資料
         let fullDB = [...defaultFoodDB, ...customFoodDB];
         let filtered = fullDB.filter(item => currentCat === '全部' || item.type === currentCat);
 
@@ -176,7 +194,6 @@
         });
 
         listEl.innerHTML = filtered.map(item => {
-            // 如果用戶有填寫專屬網址就用專屬網址，沒有就自動產生搜尋連結
             const targetUrl = item.mapUrl ? item.mapUrl : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 沖繩')}`;
             const isCustom = item.id.toString().startsWith('custom_');
             const delBtnHtml = isCustom ? `<button class="btn-card-del" onclick="deleteFood('${item.id}', event)">❌ 刪除</button>` : '';
@@ -199,8 +216,6 @@
             `;
         }).join('');
     }
-
-    renderFood();
 </script>
 </body>
 </html>
