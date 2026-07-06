@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沖繩自駕趣 - 智慧行李打包檢查表</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #D32F2F; --secondary: #8b5cf6; --bg: #F4F6F8;
+            --white: #FFFFFF; --text: #333; --light-text: #666;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; }
+        body { background-color: #e0e5ec; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; position: relative; padding-bottom: 40px; }
+        header { background: linear-gradient(135deg, var(--secondary), #7c3aed); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        header h1 { font-size: 22px; margin-bottom: 5px; }
+        .category-section { padding: 15px; }
+        .cat-card { background: var(--white); border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        .cat-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
+        .cat-title i { color: var(--secondary); }
+        .item-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #fafafa; cursor: pointer; }
+        .item-row:last-child { border-bottom: none; }
+        .checkbox-custom { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; margin-right: 12px; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .item-row.checked .checkbox-custom { background: var(--secondary); border-color: var(--secondary); }
+        .item-row.checked .checkbox-custom::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: white; font-size: 11px; }
+        .item-name { font-size: 14px; color: var(--text); font-weight: 500; }
+        .item-row.checked .item-name { color: #94a3b8; text-decoration: line-through; }
+        .item-note { font-size: 11px; color: #a1a1aa; margin-left: auto; font-style: italic; }
+        .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1><i class="fas fa-luggage-cart"></i> 沖繩自駕行李神隊友</h1>
+        <p>自駕必備、浮潛防曬裝備智慧檢查清單</p>
+    </header>
+
+    <main class="category-section" id="listContainer"></main>
+
+    <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
+</div>
+
+<script>
+    // 專為沖繩夏日自駕量身打造的打包清單資料庫
+    const packingData = {
+        "🪪 必備重要證件 (漏了絕對出不了關)": [
+            { name: "台灣駕照正本", note: "自駕靈魂！沒帶取不了車" },
+            { name: "日文駕照譯本", note: "需在監理所事先辦妥" },
+            { name: "護照正本", note: "效期需滿6個月以上" },
+            { name: "信用卡與日圓現金", note: "OTS租車與小吃攤必備" }
+        ],
+        "🚗 自駕與數位裝備": [
+            { name: "手機車用支架", note: "看 Google Maps 超方便" },
+            { name: "車充 / USB 充電線", note: "自駕導航手機必備補血" },
+            { name: "隨身 Wi-Fi 或 eSIM", note: "自駕查路絕對不能斷網" },
+            { name: "行動電源", note: "海灘拍照一整天必備" }
+        ],
+        "🏊‍♂️ 沖繩海灘與水上活動": [
+            { name: "泳衣 / 泳褲 / 水母衣", note: "青之洞窟浮潛必備" },
+            { name: "防水袋 / 手機防水殼", note: "海邊戲水防沙防海水" },
+            { name: "海洋友善防曬乳", note: "保護沖繩美麗的珊瑚礁" },
+            { name: "大毛巾 / 海灘拖鞋", note: "古宇利島踩水上岸擦拭" }
+        ]
+    };
+
+    // 自動從 LocalStorage 讀取已打勾的狀態
+    let checkedItems = JSON.parse(localStorage.getItem('okinawa_packing_status')) || [];
+
+    function renderList() {
+        const container = document.getElementById('listContainer');
+        let html = '';
+
+        for (const [cat, items] of Object.entries(packingData)) {
+            html += `<div class="cat-card"><div class="cat-title">${cat}</div>`;
+            items.forEach(item => {
+                const isChecked = checkedItems.includes(item.name);
+                html += `
+                    <div class="item-row ${isChecked ? 'checked' : ''}" onclick="toggleItem('${item.name}')">
+                        <div class="checkbox-custom"></div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-note">${item.note}</div>
+                    </div>`;
+            });
+            html += `</div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    function toggleItem(name) {
+        if (checkedItems.includes(name)) {
+            checkedItems = checkedItems.filter(i => i !== name);
+        } else {
+            checkedItems.push(name);
+        }
+        localStorage.setItem('okinawa_packing_status', JSON.stringify(checkedItems));
+        renderList();
+    }
+
+    renderList();
+</script>
+
+</body>
+</html>
