@@ -1,132 +1,122 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // 初始化 Supabase
-        const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>沖繩自駕趣 - 美食推薦魔法師</title>
+    <title>Okinawa 沖繩自駕趣 - 神隊友導航</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7'; 
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
     <style>
         :root {
-            --primary: #D32F2F; --secondary: #FFC107; --bg: #F4F6F8;
-            --white: #FFFFFF; --text: #333; --light-text: #666;
-            --star: #FFD700;
+            --primary: #D32F2F; --primary-dark: #b71c1c; --bg: #F4F6F8;
+            --card-bg: #FFFFFF; --text-main: #333333; --text-sub: #666666;
+            --border: #E0E0E0;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; }
-        body { background-color: #e0e5ec; display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 30px; }
-        header { background: linear-gradient(135deg, var(--primary), #b71c1c); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
-        header h1 { font-size: 22px; margin-bottom: 5px; }
-        .controls { padding: 15px; background: white; margin: -10px 15px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .filter-row { display: flex; gap: 10px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .filter-row::-webkit-scrollbar { display: none; }
-        .chip { padding: 6px 15px; background: #eee; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .sort-select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; outline: none; background: #f9f9f9; }
-        .food-list { padding: 0 15px; }
-        .food-card { background: var(--white); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; position: relative; transition: 0.3s; border-left: 5px solid transparent; cursor: pointer; text-decoration: none; color: inherit; }
-        .food-card:active { transform: scale(0.98); background: #fafafa; }
-        .food-card.遊客推薦 { border-left-color: #2196F3; }
-        .food-card.當地人推薦 { border-left-color: #4CAF50; }
-        .food-card.評價推薦 { border-left-color: #FF9800; }
-        .food-info { flex: 1; }
-        .food-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .food-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 5px; }
-        .tag-遊客 { background: #E3F2FD; color: #1976D2; }
-        .tag-當地 { background: #E8F5E9; color: #2E7D32; }
-        .tag-評價 { background: #FFF3E0; color: #E65100; }
-        .star-rating { color: var(--star); font-size: 11px; margin-left: 5px; font-weight: bold; }
-        .food-name { font-size: 16px; font-weight: bold; color: var(--text); margin-bottom: 4px; }
-        .food-desc { font-size: 12px; color: var(--light-text); line-height: 1.4; margin-bottom: 8px; }
-        .food-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 8px; }
-        .food-price { color: var(--primary); font-weight: bold; font-size: 14px; }
-        .food-loc { font-size: 11px; color: #999; }
-        .map-hint { font-size: 10px; color: #aaa; text-align: center; margin-top: 10px; }
-        .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
+        body { background-color: #e0e5ec; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; position: relative; }
+        header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        header h1 { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+        header p { font-size: 13px; opacity: 0.9; }
+        main { flex: 1; padding: 20px; padding-bottom: 40px; }
+        .banner-card { width: 100%; height: 160px; background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1570140994025-8b408121f84a?auto=format&fit=crop&w=800&q=80') center/cover; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; margin-bottom: 20px; }
+        .banner-card h2 { font-size: 24px; font-weight: bold; }
+        .banner-card p { font-size: 13px; margin-top: 5px; opacity: 0.9; }
+        .card { background: var(--card-bg); border-radius: 15px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 20px; }
+        .info-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { display: flex; align-items: center; gap: 10px; font-weight: bold; color: var(--text-main); font-size: 14px; }
+        .info-label i { color: var(--primary); width: 18px; text-align: center; }
+        .info-value { font-size: 14px; color: var(--text-sub); text-align: right; }
+        .menu-title { font-size: 15px; font-weight: bold; color: var(--text-main); margin-bottom: 12px; border-left: 4px solid var(--primary); padding-left: 10px; }
+        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+        .menu-btn { background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 10px; text-align: center; cursor: pointer; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+        .menu-btn:active { transform: scale(0.97); background-color: #f8fafc; }
+        .menu-btn i { font-size: 26px; }
+        .menu-btn span { font-size: 14px; font-weight: bold; }
+        .btn-itinerary i { color: #0284c7; }
+        .btn-accounting i { color: #10b981; }
+        .btn-food i { color: #f59e0b; }
+        .btn-packing i { color: #8b5cf6; }
+        .ledger-preview { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #fff, #fffbeb); border-left: 5px solid #f59e0b; }
+        .ledger-title { font-size: 13px; color: #78350f; font-weight: bold; }
+        .ledger-amount { font-size: 20px; font-weight: bold; color: var(--primary); margin-top: 3px; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <header>
-        <h1><i class="fas fa-utensils"></i> 沖繩美食推薦魔法師</h1>
-        <p>點擊餐廳卡片可開啟 Google Maps 導航</p>
+        <h1><i class="fas fa-shuttle-van"></i> 沖繩自駕趣</h1>
+        <p>機票、租車、行程、分帳，一鍵全搞定</p>
     </header>
-    <div class="controls">
-        <div class="filter-row" id="filterRow">
-            <div class="chip active" onclick="filterCat('全部')">全部</div>
-            <div class="chip" onclick="filterCat('阿古豬與肉類')">🥩 阿古豬/石垣牛</div>
-            <div class="chip" onclick="filterCat('沖繩麵與在地')">🍜 沖繩麵/海鮮</div>
-            <div class="chip" onclick="filterCat('海景甜點咖啡')">☕ 海景/甜點</div>
+    <main>
+        <div class="banner-card">
+            <h2>OKINAWA 2026</h2>
+            <p>奇怪又突然的脆友旅遊！</p>
         </div>
-        <select class="sort-select" id="sortSelect" onchange="renderFood()">
-            <option value="popularity">🔥 按熱門度排序 (推薦等級)</option>
-            <option value="price_low">💰 價位：由低到高</option>
-            <option value="price_high">💎 價位：由高到低</option>
-        </select>
-    </div>
-    <div class="food-list" id="foodList"></div>
-    <div class="map-hint">💡 點擊上方任何餐廳可直接開啟 Google 地圖導航</div>
-    <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
+        <div class="menu-title">出遊神隊友工具箱</div>
+        <div class="grid-menu">
+            <a href="osaka_magician.html" class="menu-btn btn-itinerary">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>🗺️ 行程規劃</span>
+            </a>
+            <a href="accounting.html" class="menu-btn btn-accounting">
+                <i class="fas fa-calculator"></i>
+                <span>💰 共同記帳</span>
+            </a>
+            <a href="food.html" class="menu-btn btn-food">
+                <i class="fas fa-utensils"></i>
+                <span>🍣 美食推薦</span>
+            </a>
+            <a href="packing.html" class="menu-btn btn-packing">
+                <i class="fas fa-luggage-cart"></i>
+                <span>🧳 行李打包</span>
+            </a>
+        </div>
+        <div class="menu-title">航班與租車資訊</div>
+        <div class="card">
+            <div class="info-row">
+                <div class="info-label"><i class="fas fa-plane-departure"></i> 去程航班</div>
+                <div class="info-value">待定<br><span style="font-size:11px; color:#999;">待定(xx:xx) 台北 -> 待定(xx:xx) 沖繩</span></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label"><i class="fas fa-plane-arrival"></i> 回程航班</div>
+                <div class="info-value">待定<br><span style="font-size:11px; color:#999;">待定(xx:xx) 沖繩 -> 待定(xx:xx) 台北</span></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label"><i class="fas fa-car"></i> 租車預約</div>
+                <div class="info-value">待定</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label"><i class="fas fa-hotel"></i> 住宿點</div>
+                <div class="info-value">待定</div>
+            </div>
+        </div>
+        <div class="menu-title">預算即時看板</div>
+        <div class="card ledger-preview">
+            <div>
+                <div class="ledger-title">📊 目前雲端累計總支出</div>
+                <div class="ledger-amount" id="cloudTotalJpy">¥ 0</div>
+            </div>
+            <a href="accounting.html" style="color: #f59e0b; text-decoration:none; font-size:13px; font-weight:bold;">詳細明細 <i class="fas fa-chevron-right"></i></a>
+        </div>
+    </main>
 </div>
 <script>
-    const foodDB = [
-        { name: "百年古家 大家", type: "阿古豬與肉類", cat: "遊客推薦", area: "名護市", price: 3500, desc: "在百年琉球古民家裡享受頂級阿古豬涮涮鍋，氣氛滿分", weight: 1, star: "" },
-        { name: "燒肉 Motobu牧場", type: "阿古豬與肉類", cat: "評價推薦", area: "本部町", price: 6000, desc: "沖繩本部牛頂級燒肉，肉質鮮嫩多汁，在地高分首選", weight: 2, star: "★★★★★" },
-        { name: "琉球新麵 通堂", type: "沖繩麵與在地", cat: "遊客推薦", area: "那霸市", price: 1000, desc: "經典招牌男人麵（濃郁豚骨）與女人麵（清爽鹽味）", weight: 1, star: "" },
-        { name: "幸福鬆餅 瀨長島店", type: "海景甜點咖啡", cat: "遊客推薦", area: "豐見城市", price: 1600, desc: "瀨長島純白希臘風建築，邊看海景邊吃極致蓬鬆鬆餅", weight: 1, star: "" },
-        { name: "岸本食堂 きしもと食堂", type: "沖繩麵與在地", cat: "當地人推薦", area: "本部町", price: 800, desc: "百年木炭傳統製法沖繩麵，手擀麵條極具嚼勁", weight: 3, star: "" },
-        { name: "蝦蝦飯 Kouri Shrimp", type: "沖繩麵與在地", cat: "評價推薦", area: "古宇利島", price: 1500, desc: "古宇利島爆紅夏威夷蒜香蝦飯，搭上海景超級對味", weight: 2, star: "★★★★☆" },
-        { name: "Blue Seal 牧港本店", type: "海景甜點咖啡", cat: "遊客推薦", area: "浦添市", price: 500, desc: "沖繩美式復古風冰淇淋，必吃紅芋與鹽屋雪鹽口味", weight: 1, star: "" },
-        { name: "港川外人住宅 榮町市場居酒屋", type: "沖繩麵與在地", cat: "當地人推薦", area: "浦添市/那霸", price: 2500, desc: "深夜體驗沖繩在地Orion生啤酒與傳統炒苦瓜、海葡萄", weight: 3, star: "" }
-    ];
-    let currentCat = '全部';
-    function filterCat(cat) {
-        currentCat = cat;
-        const chips = document.querySelectorAll('.chip');
-        chips.forEach(c => {
-            if(c.innerText.includes(cat.substring(0,2))) c.classList.add('active');
-            else c.classList.remove('active');
-        });
-        if(cat === '全部') chips[0].classList.add('active');
-        renderFood();
+    async function fetchCloudTotal() {
+        const { data } = await sb.from('transactions').select('total_jpy');
+        if (data) {
+            const total = data.reduce((sum, item) => sum + (parseFloat(item.total_jpy) || 0), 0);
+            document.getElementById('cloudTotalJpy').innerText = `¥ ${Math.round(total).toLocaleString()}`;
+        }
     }
-    function renderFood() {
-        const listEl = document.getElementById('foodList');
-        const sortBy = document.getElementById('sortSelect').value;
-        let filtered = foodDB.filter(item => currentCat === '全部' || item.type === currentCat);
-        filtered.sort((a, b) => {
-            if(sortBy === 'popularity') return b.weight - a.weight;
-            if(sortBy === 'price_low') return a.price - b.price;
-            if(sortBy === 'price_high') return b.price - a.price;
-        });
-        listEl.innerHTML = filtered.map(item => {
-            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 沖繩')}`;
-            const starHtml = item.cat === "評價推薦" ? `<span class="star-rating">${item.star}</span>` : "";
-            return `
-                <a href="${googleMapUrl}" target="_blank" class="food-card ${item.cat}">
-                    <div class="food-info">
-                        <div class="food-header">
-                            <span class="food-tag tag-${item.cat.substring(0,2)}">${item.cat}</span>
-                            ${starHtml}
-                        </div>
-                        <div class="food-name">${item.name}</div>
-                        <div class="food-desc">${item.desc}</div>
-                        <div class="food-meta">
-                            <div class="food-price">¥ ${item.price.toLocaleString()} ~</div>
-                            <div class="food-loc"><i class="fas fa-map-marker-alt"></i> ${item.area}</div>
-                        </div>
-                    </div>
-                </a>
-            `;
-        }).join('');
-    }
-    renderFood();
+    fetchCloudTotal();
+    sb.channel('home_realtime').on('postgres_changes', { event: '*', table: 'transactions' }, () => { fetchCloudTotal(); }).subscribe();
 </script>
 </body>
 </html>
