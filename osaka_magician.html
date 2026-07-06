@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>關西行程神隊友 - 大阪住宿鎖定版</title>
+    <title>沖繩自駕趣 - 智慧行程排程器</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // 2. 初始化雲端連線 (變數名改用 sb 避免報錯)
         const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7'; 
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -18,157 +17,91 @@
         body { background-color: #e2e8f0; margin: 0; padding: 10px; display: flex; justify-content: center; }
         .app-container { width: 100%; max-width: 800px; background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; padding-bottom: 30px; }
         header { background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; padding: 20px; text-align: center; }
-        
         .form-section { padding: 20px; border-bottom: 6px solid var(--bg); display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #333; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
-
         .selector-section { padding: 20px; }
         .city-accordion { margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
         .city-header { padding: 12px; background: #f1f5f9; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; color: #b71c1c; }
         .city-content { display: none; padding: 15px; max-height: 500px; overflow-y: auto; }
         .city-content.active { display: block; }
-        
         .cat-title { font-size: 14px; color: var(--secondary); font-weight: bold; margin: 15px 0 8px; border-bottom: 1px solid #eee; padding-bottom: 3px;}
-        .cat-title:first-child { margin-top: 0; }
-
         .spot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top:10px; }
-        
         .spot-item { padding: 30px 8px 10px; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 12px; text-align: center; transition: 0.2s; position: relative; background: #fff; }
-        .spot-item:hover { border-color: #cbd5e1; }
         .spot-item.active { border-color: var(--secondary); background: #fff7ed; font-weight: bold; border-width: 2px; }
         .spot-item.full-day { border-color: #8b5cf6; background: #faf5ff; } 
-        .spot-item.active.full-day { border-color: #8b5cf6; border-width: 2px; }
-
-        .fd-toggle-btn { position: absolute; top: 6px; left: 6px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background: #e2e8f0; color: #64748b; font-weight: bold; transition: 0.2s; }
-        .fd-toggle-btn:hover { background: #cbd5e1; }
-        .fd-toggle-btn.is-full { background: #8b5cf6; color: #fff; box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3); }
-        
-        .btn-main { width: 100%; padding: 15px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 6px rgba(211, 47, 47, 0.2); transition:0.2s;}
-        .btn-main:active { transform: translateY(2px); box-shadow: none; }
-
+        .fd-toggle-btn { position: absolute; top: 6px; left: 6px; font-size: 10px; padding: 3px 6px; border-radius: 4px; background: #e2e8f0; color: #64748b; font-weight: bold; }
+        .fd-toggle-btn.is-full { background: #8b5cf6; color: #fff; }
+        .btn-main { width: 100%; padding: 15px; background: #d32f2f; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
         .result-container { padding: 20px; display: none; }
-        .day-block { margin-bottom: 30px; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .day-block { margin-bottom: 30px; border: 1px solid #e2e8f0; border-radius: 10px; }
         .day-header { padding: 12px 15px; background: #333; color: white; font-weight: bold; border-radius: 10px 10px 0 0; }
-        
         .timeline { padding: 20px; position: relative; padding-left: 45px; }
         .timeline::before { content: ''; position: absolute; left: 24px; top: 20px; bottom: 20px; width: 3px; background: #cbd5e1; }
-        
-        .node { position: relative; margin-bottom: 25px; padding: 15px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .node { position: relative; margin-bottom: 25px; padding: 15px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; }
         .node.is-full-day { background: #f3e8ff; border-color: #d8b4fe; } 
         .node::before { content: ''; position: absolute; left: -28px; top: 20px; width: 14px; height: 14px; background: #fff; border: 4px solid var(--secondary); border-radius: 50%; z-index: 2; }
-        
         .node-time { font-size: 14px; font-weight: bold; color: #475569; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 8px;}
         .node-title { font-size: 16px; font-weight: bold; color: #0f172a; margin-bottom: 5px; }
-        
-        .status-tag { font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 5px;}
+        .status-tag { font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; display: inline-block; }
         .status-ok { background: #dcfce7; color: #166534; }
         .status-warn { background: #fee2e2; color: #991b1b; }
-        
-        .transit { font-size: 12px; color: #64748b; margin: 15px 0 15px 10px; position: relative; font-weight: bold; }
-        .transit i { color: #94a3b8; margin-right: 5px; }
-        
-        .node-ctrl { display: flex; gap: 5px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; flex-wrap: wrap; }
-        .c-btn { border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #475569; }
-        .c-btn:hover { background: #e2e8f0; color: #0f172a; }
-        .unassigned-alert { background: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
+        .transit { font-size: 12px; color: #64748b; margin: 15px 0 15px 10px; font-weight: bold; }
+        .node-ctrl { display: flex; gap: 5px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cbd5e1; }
+        .c-btn { border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+        .unassigned-alert { background: #fee2e2; border: 1px solid #f87171; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-
 <div class="app-container">
     <header>
-        <h2 style="margin:0;"><i class="fas fa-hotel"></i> 關西行程神隊友</h2>
-        <p style="margin:5px 0 0; font-size:13px; opacity:0.9;">住宿鎖定：大阪區域 | 130+ 景點完整規劃</p>
+        <h2 style="margin:0;"><i class="fas fa-shuttle-van"></i> 沖繩自駕行程神隊友</h2>
+        <p style="margin:5px 0 0; font-size:13px; opacity:0.9;">那霸基地自駕縱跨線路排程系統</p>
     </header>
-
     <div class="form-section">
-        <div class="form-group"><label>班機抵達 (KIX)</label><input type="time" id="arrTime" value="10:30"></div>
-        <div class="form-group"><label>班機離開 (KIX)</label><input type="time" id="depTime" value="19:00"></div>
+        <div class="form-group"><label>航班抵達 (OKA)</label><input type="time" id="arrTime" value="11:50"></div>
+        <div class="form-group"><label>航班離開 (OKA)</label><input type="time" id="depTime" value="13:00"></div>
         <div class="form-group">
-            <label>大阪住宿區域</label>
+            <label>主要住宿區域</label>
             <select id="hotel">
-                <option value="大阪-難波">難波 / 心齋橋區域 (近南海電鐵)</option>
-                <option value="大阪-梅田">梅田 / 大阪車站區域 (近JR/京都線)</option>
-                <option value="大阪-天王寺">天王寺 / 阿倍野區域 (近HARUKA)</option>
+                <option value="那霸市區">那霸市區 (國際通/首里城方便)</option>
+                <option value="恩納村">恩納村 (中北部度假海景飯店)</option>
             </select>
         </div>
         <div class="form-group"><label>總天數</label><input type="number" id="days" value="5" min="1" max="15"></div>
     </div>
-
     <div class="selector-section">
         <div id="accordion"></div>
-        <button class="btn-main" onclick="initPlanner()">✨ 開始智慧裝箱排程 (以大阪為基地)</button>
-	<button id="btnCloud" class="btn-main" style="background: #059669; margin-top: 10px;" onclick="saveToCloud()">💾 同步到雲端 (存檔)</button>
+        <button class="btn-main" onclick="initPlanner()">✨ 開始智慧自駕排程 (沖繩縱貫線)</button>
+        <button id="btnCloud" class="btn-main" style="background: #059669; margin-top: 10px;" onclick="saveToCloud()">💾 同步到雲端 (存檔)</button>
     </div>
-
     <div class="result-container" id="resultArea"></div>
 </div>
-
 <script>
 const masterDB = {
-    "一、 大阪 (Osaka)": {
-        "1. 核心地標與歷史": [
-            {name:"天守閣", stay:2, open:"09:00", close:"17:00", city:"大阪", fullDay:false}, {name:"西之丸庭園", stay:1, open:"09:00", close:"17:00", city:"大阪", fullDay:false}, {name:"大阪城櫓", stay:1, open:"10:00", close:"16:30", city:"大阪", fullDay:false}, {name:"豐國神社", stay:0.5, open:"09:00", close:"17:00", city:"大阪", fullDay:false}, {name:"大阪城音樂堂", stay:1, open:"09:00", close:"17:00", city:"大阪", fullDay:false},
-            {name:"四天王寺", stay:1.5, open:"08:30", close:"16:30", city:"大阪", fullDay:false}, {name:"住吉大社", stay:1.5, open:"06:00", close:"17:00", city:"大阪", fullDay:false}, {name:"大阪天滿宮", stay:1, open:"09:00", close:"17:00", city:"大阪", fullDay:false}, {name:"露天神社", stay:1, open:"06:00", close:"23:00", city:"大阪", fullDay:false}, {name:"難波八阪神社", stay:1, open:"06:00", close:"17:00", city:"大阪", fullDay:false},
-            {name:"大阪歷史博物館", stay:2, open:"09:30", close:"17:00", city:"大阪", fullDay:false}, {name:"大阪市立美術館", stay:2, open:"09:30", close:"17:00", city:"大阪", fullDay:false}, {name:"國立國際美術館", stay:2, open:"10:00", close:"17:00", city:"大阪", fullDay:false}, {name:"大阪市立科學館", stay:2, open:"09:30", close:"17:00", city:"大阪", fullDay:false}, {name:"上方浮世繪館", stay:1, open:"11:00", close:"18:00", city:"大阪", fullDay:false}
-        ],
-        "2. 現代娛樂與展望": [
-            {name:"阿倍野 HARUKAS 300", stay:2, open:"09:00", close:"22:00", city:"大阪", fullDay:false}, {name:"梅田藍天大廈", stay:1.5, open:"09:30", close:"22:30", city:"大阪", fullDay:false}, {name:"咲洲廳舍展望台", stay:1.5, open:"11:00", close:"22:00", city:"大阪", fullDay:false}, {name:"通天閣", stay:1.5, open:"10:00", close:"20:00", city:"大阪", fullDay:false},
-            {name:"海遊館", stay:3, open:"10:00", close:"20:00", city:"大阪", fullDay:false}, {name:"日本環球影城(USJ)", stay:9, open:"08:30", close:"21:30", city:"大阪", fullDay:true}, {name:"天保山大摩天輪", stay:1, open:"10:00", close:"22:00", city:"大阪", fullDay:false}, {name:"Legoland", stay:3, open:"10:00", close:"18:00", city:"大阪", fullDay:false},
-            {name:"道頓堀觀光船", stay:1, open:"11:00", close:"21:00", city:"大阪", fullDay:false}, {name:"中之島水上巴士", stay:1, open:"10:00", close:"17:00", city:"大阪", fullDay:false}, {name:"聖瑪利亞號觀光船", stay:1, open:"11:00", close:"16:00", city:"大阪", fullDay:false}
-        ],
-        "3. 購物與常民生活": [
-            {name:"天神橋筋商店街", stay:2, open:"10:00", close:"20:00", city:"大阪", fullDay:false}, {name:"黑門市場", stay:1.5, open:"09:00", close:"17:00", city:"大阪", fullDay:false}, {name:"心齋橋筋", stay:3, open:"11:00", close:"21:00", city:"大阪", fullDay:false}, {name:"戎橋筋", stay:2, open:"11:00", close:"21:00", city:"大阪", fullDay:false}, {name:"千日前道具屋筋", stay:1, open:"10:00", close:"18:00", city:"大阪", fullDay:false},
-            {name:"美國村", stay:2, open:"11:00", close:"20:00", city:"大阪", fullDay:false}, {name:"堀江", stay:2, open:"11:00", close:"20:00", city:"大阪", fullDay:false}, {name:"空堀", stay:1.5, open:"10:00", close:"18:00", city:"大阪", fullDay:false}, {name:"新世界", stay:2, open:"10:00", close:"22:00", city:"大阪", fullDay:false},
-            {name:"萬博紀念公園", stay:3, open:"09:30", close:"17:00", city:"大阪", fullDay:false}, {name:"五月山動物園", stay:1.5, open:"09:15", close:"16:45", city:"大阪", fullDay:false}, {name:"箕面大瀧", stay:3, open:"00:00", close:"23:59", city:"大阪", fullDay:false}, {name:"萬博 Lalaport", stay:3, open:"10:00", close:"21:00", city:"大阪", fullDay:false}
+    "北部地區 (名護/本部)": {
+        "經典必去景點": [
+            {name:"美麗海水族館", stay:3.5, open:"08:30", close:"18:30", city:"北部", fullDay:false},
+            {name:"古宇利大橋/心形岩", stay:2, open:"00:00", close:"23:59", city:"北部", fullDay:false},
+            {name:"萬座毛", stay:1, open:"08:00", close:"19:00", city:"北部", fullDay:false},
+            {name:"名護鳳梨園", stay:1.5, open:"10:00", close:"17:00", city:"北部", fullDay:false}
         ]
     },
-    "二、 京都 (Kyoto)": {
-        "1. 洛東 (東山區)": [
-            {name:"清水寺", stay:2.5, open:"06:00", close:"18:00", city:"京都", fullDay:false}, {name:"地主神社", stay:0.5, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"高台寺", stay:1.5, open:"09:00", close:"17:30", city:"京都", fullDay:false}, {name:"法觀寺(八坂之塔)", stay:0.5, open:"10:00", close:"16:00", city:"京都", fullDay:false}, {name:"八坂神社", stay:1, open:"00:00", close:"23:59", city:"京都", fullDay:false}, {name:"知恩院", stay:1.5, open:"09:00", close:"16:30", city:"京都", fullDay:false}, {name:"南禪寺", stay:1.5, open:"08:40", close:"17:00", city:"京都", fullDay:false}, {name:"永觀堂", stay:1.5, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"銀閣寺", stay:1.5, open:"08:30", close:"17:00", city:"京都", fullDay:false}, {name:"哲學之道", stay:1, open:"00:00", close:"23:59", city:"京都", fullDay:false}
-        ],
-        "2. 洛中 (中心區)": [
-            {name:"二條城", stay:2, open:"08:45", close:"17:00", city:"京都", fullDay:false}, {name:"京都御所", stay:2, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"仙洞御所", stay:1.5, open:"09:30", close:"16:00", city:"京都", fullDay:false}, {name:"京都文化博物館", stay:1.5, open:"10:00", close:"19:30", city:"京都", fullDay:false}, {name:"京都漫畫博物館", stay:2, open:"10:30", close:"17:30", city:"京都", fullDay:false}, {name:"錦市場", stay:1.5, open:"10:00", close:"18:00", city:"京都", fullDay:false}, {name:"本能寺", stay:1, open:"09:00", close:"17:00", city:"京都", fullDay:false}
-        ],
-        "3. 洛西 (嵐山/右京)": [
-            {name:"天龍寺", stay:1.5, open:"08:30", close:"17:00", city:"京都", fullDay:false}, {name:"常寂光寺", stay:1, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"大覺寺", stay:1.5, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"野宮神社", stay:0.5, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"竹林小徑", stay:1, open:"00:00", close:"23:59", city:"京都", fullDay:false}, {name:"渡月橋", stay:1, open:"00:00", close:"23:59", city:"京都", fullDay:false}, {name:"車折神社", stay:1, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"金閣寺", stay:1.5, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"龍安寺", stay:1, open:"08:00", close:"17:00", city:"京都", fullDay:false}, {name:"仁和寺", stay:1.5, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"太秦映畫村", stay:3, open:"09:00", close:"17:00", city:"京都", fullDay:false}
-        ],
-        "4. 洛南 (南區/伏見)": [
-            {name:"伏見稻荷大社", stay:2.5, open:"00:00", close:"23:59", city:"京都", fullDay:false}, {name:"東寺", stay:1.5, open:"08:00", close:"17:00", city:"京都", fullDay:false}, {name:"三十三間堂", stay:1, open:"08:30", close:"17:00", city:"京都", fullDay:false}, {name:"東福寺", stay:1.5, open:"09:00", close:"16:00", city:"京都", fullDay:false}, {name:"西本願寺", stay:1, open:"05:30", close:"17:00", city:"京都", fullDay:false}, {name:"東本願寺", stay:1, open:"05:50", close:"17:30", city:"京都", fullDay:false}, {name:"伏見十石舟", stay:1, open:"10:00", close:"16:00", city:"京都", fullDay:false}, {name:"月桂冠大倉紀念館", stay:1, open:"09:30", close:"16:30", city:"京都", fullDay:false}
-        ],
-        "5. 洛北 (左京區)": [
-            {name:"貴船神社", stay:1.5, open:"06:00", close:"20:00", city:"京都", fullDay:false}, {name:"鞍馬寺", stay:2.5, open:"09:00", close:"16:30", city:"京都", fullDay:false}, {name:"下鴨神社", stay:1.5, open:"06:30", close:"17:00", city:"京都", fullDay:false}, {name:"上賀茂神社", stay:1.5, open:"05:30", close:"17:00", city:"京都", fullDay:false}, {name:"修學院離宮", stay:1.5, open:"09:00", close:"15:00", city:"京都", fullDay:false}, {name:"琉璃光院", stay:1.5, open:"10:00", close:"17:00", city:"京都", fullDay:false}, {name:"三千院", stay:2, open:"09:00", close:"17:00", city:"京都", fullDay:false}
-        ],
-        "6. 京都府近郊": [
-            {name:"宇治平等院", stay:2, open:"08:30", close:"17:30", city:"京都", fullDay:false}, {name:"宇治上神社", stay:1, open:"09:00", close:"16:30", city:"京都", fullDay:false}, {name:"源氏物語博物館", stay:1.5, open:"09:00", close:"17:00", city:"京都", fullDay:false}, {name:"天橋立", stay:4, open:"00:00", close:"23:59", city:"郊區", fullDay:false}, {name:"伊根舟屋", stay:3, open:"09:00", close:"17:00", city:"郊區", fullDay:false}, {name:"美山茅屋之里", stay:3, open:"09:00", close:"17:00", city:"郊區", fullDay:false}
+    "中部地區 (恩納/美國村)": {
+        "休閒與逛街商圈": [
+            {name:"美國村 Depot Island", stay:3, open:"10:00", close:"22:00", city:"中部", fullDay:false},
+            {name:"殘波岬燈塔", stay:1, open:"09:00", close:"17:30", city:"中部", fullDay:false},
+            {name:"永旺夢樂城來客夢", stay:4, open:"10:00", close:"22:00", city:"中部", fullDay:false},
+            {name:"青之洞窟潛水", stay:3, open:"08:00", close:"17:00", city:"中部", fullDay:false}
         ]
     },
-    "三、 奈良 (Nara)": {
-        "1. 奈良公園周邊": [
-            {name:"東大寺/奈良公園", stay:3, open:"07:30", close:"17:30", city:"奈良", fullDay:false}, {name:"春日大社", stay:1.5, open:"06:30", close:"17:30", city:"奈良", fullDay:false}, {name:"興福寺", stay:1, open:"09:00", close:"17:00", city:"奈良", fullDay:false}, {name:"奈良國立博物館", stay:2, open:"09:30", close:"17:00", city:"奈良", fullDay:false}, {name:"依水園", stay:1, open:"09:30", close:"16:30", city:"奈良", fullDay:false}, {name:"吉城園", stay:1, open:"09:00", close:"17:00", city:"奈良", fullDay:false}, {name:"若草山", stay:1.5, open:"09:00", close:"17:00", city:"奈良", fullDay:false}, {name:"冰室神社", stay:0.5, open:"06:00", close:"18:00", city:"奈良", fullDay:false}
-        ],
-        "2. 奈良町與市內": [
-            {name:"元興寺", stay:1, open:"09:00", close:"17:00", city:"奈良", fullDay:false}, {name:"奈良町格子之家", stay:1, open:"09:00", close:"17:00", city:"奈良", fullDay:false}, {name:"庚申堂", stay:0.5, open:"09:00", close:"17:00", city:"奈良", fullDay:false}, {name:"志津香釜飯", stay:1.5, open:"11:00", close:"19:00", city:"奈良", fullDay:false}
-        ],
-        "3. 西之京與佐紀路": [
-            {name:"藥師寺", stay:1.5, open:"08:30", close:"17:00", city:"奈良", fullDay:false}, {name:"唐招提寺", stay:1.5, open:"08:30", close:"17:00", city:"奈良", fullDay:false}, {name:"西大寺", stay:1, open:"08:30", close:"16:30", city:"奈良", fullDay:false}, {name:"平城宮跡", stay:2, open:"09:00", close:"16:30", city:"奈良", fullDay:false}
-        ],
-        "4. 奈良縣南郊": [
-            {name:"法隆寺", stay:2, open:"08:00", close:"17:00", city:"奈良", fullDay:false}, {name:"法輪寺", stay:1, open:"08:00", close:"17:00", city:"奈良", fullDay:false}, {name:"中宮寺", stay:1, open:"09:00", close:"16:30", city:"奈良", fullDay:false}, {name:"石舞台古墳", stay:1, open:"08:30", close:"17:00", city:"奈良", fullDay:false}, {name:"飛鳥寺", stay:1, open:"09:00", close:"17:30", city:"奈良", fullDay:false}, {name:"橿原神宮", stay:1.5, open:"06:00", close:"18:00", city:"奈良", fullDay:false}, {name:"今井町江戶老街", stay:2, open:"00:00", close:"23:59", city:"奈良", fullDay:false}, {name:"吉野山", stay:6, open:"00:00", close:"23:59", city:"郊區", fullDay:false}, {name:"金峯山寺", stay:1.5, open:"08:30", close:"16:30", city:"郊區", fullDay:false}
-        ]
-    },
-    "四、 周邊擴張": {
-        "1. 兵庫/神戶": [
-            {name:"北野異人館街", stay:2, open:"09:30", close:"18:00", city:"神戶", fullDay:false}, {name:"神戶布引香草園", stay:2.5, open:"09:30", close:"17:00", city:"神戶", fullDay:false}, {name:"神戶港樂園", stay:2, open:"10:00", close:"22:00", city:"神戶", fullDay:false}, {name:"生田神社", stay:1, open:"07:00", close:"17:00", city:"神戶", fullDay:false}, {name:"南京町中華街", stay:1.5, open:"10:00", close:"21:00", city:"神戶", fullDay:false},
-            {name:"六甲山天覽台", stay:2, open:"07:10", close:"21:00", city:"神戶", fullDay:false}, {name:"有馬溫泉", stay:3, open:"09:00", close:"22:00", city:"神戶", fullDay:false}, {name:"摩耶山夜景", stay:2, open:"10:00", close:"21:00", city:"神戶", fullDay:false}, {name:"姬路城", stay:3.5, open:"09:00", close:"17:00", city:"神戶", fullDay:false}, {name:"明石海峽大橋", stay:1, open:"09:00", close:"17:00", city:"神戶", fullDay:false}
-        ],
-        "2. 滋賀 (琵琶湖)": [
-            {name:"彥根城", stay:2.5, open:"08:30", close:"17:00", city:"郊區", fullDay:false}, {name:"近江八幡水鄉", stay:3, open:"09:00", close:"17:00", city:"郊區", fullDay:false}, {name:"白鬚神社", stay:1, open:"00:00", close:"23:59", city:"郊區", fullDay:false}, {name:"比叡山延曆寺", stay:3, open:"08:30", close:"16:30", city:"郊區", fullDay:false}, {name:"MIHO MUSEUM", stay:3, open:"10:00", close:"17:00", city:"郊區", fullDay:false}, {name:"琵琶湖 Terrace", stay:3, open:"09:00", close:"17:00", city:"郊區", fullDay:false}
-        ],
-        "3. 和歌山": [
-            {name:"和歌山城", stay:2, open:"09:00", close:"17:30", city:"和歌山", fullDay:false}, {name:"貴志站貓站長", stay:2, open:"09:00", close:"17:30", city:"和歌山", fullDay:false}, {name:"高野山金剛峰寺", stay:4, open:"08:30", close:"17:00", city:"和歌山", fullDay:false}, {name:"熊野古道", stay:5, open:"00:00", close:"23:59", city:"和歌山", fullDay:false}, {name:"那智大瀑布", stay:1.5, open:"07:00", close:"16:30", city:"和歌山", fullDay:false},
-            {name:"白濱溫泉", stay:3, open:"00:00", close:"23:59", city:"和歌山", fullDay:false}, {name:"三段壁", stay:1, open:"08:00", close:"17:00", city:"和歌山", fullDay:false}, {name:"圓月島", stay:1, open:"00:00", close:"23:59", city:"和歌山", fullDay:false}, {name:"Adventure World", stay:6, open:"10:00", close:"17:00", city:"和歌山", fullDay:false}
+    "南部地區 (那霸/瀨長島)": {
+        "古蹟與免稅購物": [
+            {name:"國際通商圈", stay:2.5, open:"11:00", close:"23:00", city:"南部", fullDay:false},
+            {name:"瀨長島 Umikaji Terrace", stay:2, open:"10:00", close:"21:00", city:"南部", fullDay:false},
+            {name:"首里城公園", stay:2, open:"08:30", close:"18:00", city:"南部", fullDay:false},
+            {name:"沖繩世界文化王國", stay:3, open:"09:00", close:"17:30", city:"南部", fullDay:false},
+            {name:"ASHIBINAA Outlet", stay:3, open:"10:00", close:"20:00", city:"南部", fullDay:false}
         ]
     }
 };
@@ -179,11 +112,11 @@ let config = {};
 
 function renderSelection() {
     const target = document.getElementById('accordion');
+    target.innerHTML = '';
     for (const [region, categories] of Object.entries(masterDB)) {
         const div = document.createElement('div'); div.className = 'city-accordion';
         div.innerHTML = `<div class="city-header" onclick="this.nextElementSibling.classList.toggle('active')"><span>${region}</span> <i class="fas fa-chevron-down"></i></div>`;
         const content = document.createElement('div'); content.className = 'city-content';
-        
         for (const [catName, spots] of Object.entries(categories)) {
             const catTitle = document.createElement('div'); catTitle.className = 'cat-title'; catTitle.innerText = catName;
             content.appendChild(catTitle);
@@ -193,11 +126,10 @@ function renderSelection() {
                 item.className = `spot-item ${s.fullDay ? 'full-day' : ''}`;
                 const badge = document.createElement('div');
                 badge.className = `fd-toggle-btn ${s.fullDay ? 'is-full' : ''}`;
-                badge.innerHTML = s.fullDay ? '<i class="fas fa-crown"></i> 獨佔全日' : '<i class="far fa-clock"></i> 依時數';
+                badge.innerHTML = s.fullDay ? '<i class="fas fa-crown"></i> 全日專屬' : '<i class="far fa-clock"></i> 依時數';
                 badge.onclick = (e) => {
                     e.stopPropagation(); s.fullDay = !s.fullDay; 
                     badge.className = `fd-toggle-btn ${s.fullDay ? 'is-full' : ''}`;
-                    badge.innerHTML = s.fullDay ? '<i class="fas fa-crown"></i> 獨佔全日' : '<i class="far fa-clock"></i> 依時數';
                     item.classList.toggle('full-day', s.fullDay);
                 };
                 const info = document.createElement('div');
@@ -214,11 +146,11 @@ function renderSelection() {
 function t2m(t) { let [h, m] = t.split(':').map(Number); return h * 60 + m; }
 function m2t(m) { let h = Math.floor(m / 60) % 24; let min = Math.round(m % 60); return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`; }
 
-function getTransitMins(fromCity, toCity) {
-    if (fromCity === "機場" || toCity === "機場") return 50;
-    if (fromCity === toCity || (fromCity.includes("大阪") && toCity === "大阪")) return 30; 
-    const map = { "大阪-京都": 55, "京都-大阪": 55, "大阪-奈良": 50, "奈良-大阪": 50, "大阪-神戶": 45, "神戶-大阪": 45, "大阪-和歌山": 80, "大阪-郊區": 95 };
-    return map[`${fromCity}-${toCity}`] || 65; 
+function getTransitMins(fromLoc, toLoc) {
+    if (fromLoc === "機場" || toLoc === "機場") return 40;
+    if (fromLoc === toLoc) return 20; 
+    const map = { "南部-中部": 45, "中部-南部": 45, "中部-北部": 50, "北部-中部": 50, "南部-北部": 80, "北部-南部": 80 };
+    return map[`${fromLoc}-${toLoc}`] || 30; 
 }
 
 function initPlanner() {
@@ -227,23 +159,13 @@ function initPlanner() {
     let spots = Array.from(selectedSet).map(s => ({...s}));
     let fullDaySpots = spots.filter(s => s.fullDay);
     let normalSpots = spots.filter(s => !s.fullDay);
-    normalSpots.sort((a, b) => {
-        if(a.city !== b.city) return a.city.localeCompare(b.city);
-        return t2m(a.open) - t2m(b.open);
-    });
+normalSpots.sort((a, b) => a.city.localeCompare(b.city));
     scheduledDays = Array.from({length: config.days}, () => []);
     let unassigned = [];
-    for (let fSpot of fullDaySpots) {
-        let placed = false;
-        for (let i = 1; i < config.days - 1; i++) { if (scheduledDays[i].length === 0) { scheduledDays[i].push(fSpot); placed = true; break; } }
-        if (!placed) { for (let i = 0; i < config.days; i++) { if (scheduledDays[i].length === 0) { scheduledDays[i].push(fSpot); placed = true; break; } } }
-        if (!placed) unassigned.push(fSpot);
-    }
     for (let i = 0; i < config.days; i++) {
-        if (scheduledDays[i].some(s => s.fullDay)) continue;
         let currentMins = (i === 0) ? t2m(config.arr) + 60 : t2m("09:00");
-        let dayLimit = (i === config.days - 1) ? t2m(config.dep) - 150 : t2m("21:00"); 
-        let currentLoc = (i === 0) ? "機場" : "大阪";
+        let dayLimit = (i === config.days - 1) ? t2m(config.dep) - 150 : t2m("20:30"); 
+        let currentLoc = (i === 0) ? "機場" : "南部";
         let spotIdx = 0;
         while (spotIdx < normalSpots.length) {
             let spot = normalSpots[spotIdx];
@@ -272,29 +194,28 @@ function del(d, s) { scheduledDays[d].splice(s, 1); renderResult(); }
 
 function renderResult(unassigned = []) {
     const target = document.getElementById('resultArea');
-    let html = '<h3><i class="fas fa-clipboard-check"></i> 大阪出發行程表</h3>';
+    let html = '<h3><i class="fas fa-clipboard-check"></i> 沖繩自駕行程表</h3>';
     if (unassigned && unassigned.length > 0) {
         let names = unassigned.map(s => s.name).join('、');
-        html += `<div class="unassigned-alert"><i class="fas fa-exclamation-triangle"></i> 行程塞不下囉：<br><span style="font-weight:normal;">${names}</span></div>`;
+        html += `<div class="unassigned-alert"><i class="fas fa-exclamation-triangle"></i> 自駕線路太滿塞不下：<br><span>${names}</span></div>`;
     }
     for (let d = 0; d < config.days; d++) {
-        let isFullDay = scheduledDays[d].some(s => s.fullDay);
-        html += `<div class="day-block"><div class="day-header">第 ${d+1} 天 ${isFullDay?'(全日專屬)':''}</div><div class="timeline">`;
+        html += `<div class="day-block"><div class="day-header">第 ${d+1} 天</div><div class="timeline">`;
         let now = (d === 0) ? t2m(config.arr) + 60 : t2m("09:00");
-        let loc = (d === 0) ? "機場" : "大阪";
-        if (d === 0) html += `<div class="node"><div class="node-time">${m2t(now)}</div><div class="node-title">機場入境</div></div>`;
+        let loc = (d === 0) ? "機場" : "南部";
+        if (d === 0) html += `<div class="node"><div class="node-time">${m2t(now)}</div><div class="node-title">🚗 OKA 機場取車自駕出發</div></div>`;
         scheduledDays[d].forEach((spot, sIdx) => {
             let trans = getTransitMins(loc, spot.city); now += trans; 
-            html += `<div class="transit"><i class="fas fa-car-side"></i> 從 ${loc} 前往 ${spot.name} (約 ${trans} 分)</div>`;
+            html += `<div class="transit"><i class="fas fa-car"></i> 導航行駛自駕前往 ${spot.name} (約 ${trans} 分鐘)</div>`;
             let open = t2m(spot.open), close = t2m(spot.close);
-            if(now < open) { html += `<div class="node" style="opacity:0.6;"><div class="node-time">${m2t(now)}</div><div class="node-title">等待開門 (${open-now}分)</div></div>`; now = open; }
+            if(now < open) { now = open; }
             let end = now + (spot.stay * 60);
             let isWarn = (end > close && spot.close !== "23:59");
             html += `
-                <div class="node ${spot.fullDay?'is-full-day':''}">
+                <div class="node">
                     <div class="node-time">${m2t(now)} - ${m2t(end)}</div>
-                    <div class="node-title">${spot.name} <span style="font-size:11px; font-weight:normal; color:#888;">(${spot.city})</span></div>
-                    <div class="status-tag ${isWarn?'status-warn':'status-ok'}">${isWarn?'⚠️ 超過打烊':'✅ 營業中'} (${spot.open}-${spot.close})</div>
+                    <div class="node-title">${spot.name}</div>
+                    <div class="status-tag ${isWarn?'status-warn':'status-ok'}">${isWarn?'⚠️ 超過打烊':'✅ 營業中'}</div>
                     <div class="node-ctrl">
                         <button class="c-btn" onclick="adjust(${d}, ${sIdx}, -0.5)">-30m</button>
                         <span style="font-size:12px; font-weight:bold; margin:0 5px;">停留 ${spot.stay}h</span>
@@ -307,90 +228,51 @@ function renderResult(unassigned = []) {
             `;
             now = end; loc = spot.city;
         });
-        if(d === config.days - 1) {
-            let depLimit = t2m(config.dep) - 150;
-            let transToAir = getTransitMins(loc, "機場"); now += transToAir;
-            html += `<div class="transit"><i class="fas fa-plane"></i> 前往關西機場 (約 ${transToAir} 分)</div>`;
-            html += `<div class="node"><div class="node-time">${m2t(now)}</div><div class="node-title">抵達機場</div>${now > depLimit ? '<div class="status-tag status-warn">⚠️ 趕不上飛機！</div>':''}</div>`;
-        } else {
-            let transToH = getTransitMins(loc, "大阪"); now += transToH;
-            html += `<div class="transit"><i class="fas fa-bed"></i> 返回大阪住宿處 (約 ${transToH} 分)</div>`;
-            html += `<div class="node"><div class="node-time">${m2t(now)}</div><div class="node-title">回到飯店休息</div></div>`;
-        }
         html += `</div></div>`;
     }
     target.innerHTML = html;
 }
 
-// --- 1. 雲端同步功能 ---
 async function saveToCloud() {
     const btn = document.getElementById('btnCloud');
-    if(!btn) return;
     btn.innerText = "正在儲存...";
-    btn.disabled = true;
-
     const selectedArray = Array.from(selectedSet);
-    const { error } = await sb.from('saved_itinerary').upsert({
+    await sb.from('saved_itinerary').upsert({
         id: '99999999-9999-9999-9999-999999999999',
         config: config,
         selected_spots: selectedArray,
         schedule: scheduledDays
     });
-
-    if (!error) { 
-        alert("✅ 行程已同步到雲端！"); 
-    } else { 
-        alert("❌ 儲存失敗：" + error.message); 
-    }
+    alert("✅ 沖繩行程已同步至雲端！");
     btn.innerText = "💾 同步到雲端 (存檔)";
-    btn.disabled = false;
 }
 
 async function loadFromCloud() {
-    const { data, error } = await sb.from('saved_itinerary')
-        .select('*')
-        .eq('id', '99999999-9999-9999-9999-999999999999')
-        .single();
-
+    const { data } = await sb.from('saved_itinerary').select('*').eq('id', '99999999-9999-9999-9999-999999999999').single();
     if (data) {
         config = data.config || {};
-        if (config.days) document.getElementById('days').value = config.days;
-        if (config.arr) document.getElementById('arrTime').value = config.arr;
-        if (config.dep) document.getElementById('depTime').value = config.dep;
-        if (config.hotel) document.getElementById('hotel').value = config.hotel;
-        
         selectedSet = new Set(data.selected_spots);
-        restoreUI(); // 還原景點選取狀態
-
+        restoreUI();
         if (data.schedule && data.schedule.length > 0) {
             scheduledDays = data.schedule;
             document.getElementById('resultArea').style.display = 'block';
-            renderResult(); // 還原排好的行程表
+            renderResult();
         }
     }
 }
 
-// 還原 UI：讓選過的景點變回橘色
 function restoreUI() {
     const items = document.querySelectorAll('.spot-item');
     items.forEach(item => {
         const titleEl = item.querySelector('div:last-child div:first-child');
         if(!titleEl) return;
-        const spotName = titleEl.innerText;
         for (let s of selectedSet) {
-            if (s.name === spotName) {
-                item.classList.add('active');
-                break;
-            }
+            if (s.name === titleEl.innerText) { item.classList.add('active'); break; }
         }
     });
 }
 
-// --- 2. 網頁開啟初始化 ---
-window.onload = async () => {
-    renderSelection(); // 畫出景點清單 (確保只呼叫這一次)
-    await loadFromCloud(); // 接著從雲端抓取資料並還原狀態
-};
+window.onload = async () => { renderSelection(); await loadFromCloud(); };
 </script>
 </body>
 </html>
