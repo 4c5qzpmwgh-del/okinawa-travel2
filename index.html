@@ -1,243 +1,132 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // 初始化 Supabase
+        const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大阪通 - 深度旅行助手</title>
+    <title>沖繩自駕趣 - 美食推薦魔法師</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // 2. 初始化 Supabase 連線 (請確保金鑰正確)
-        const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7'; 
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    </script>
     <style>
         :root {
-            --primary-color: #D32F2F; 
-            --secondary-color: #FFC107;
-            --bg-color: #F4F6F8;
-            --text-dark: #333;
-            --text-light: #666;
-            --white: #FFF;
+            --primary: #D32F2F; --secondary: #FFC107; --bg: #F4F6F8;
+            --white: #FFFFFF; --text: #333; --light-text: #666;
+            --star: #FFD700;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; }
         body { background-color: #e0e5ec; display: flex; justify-content: center; }
-
-        .app-container {
-            width: 100%; max-width: 480px; background-color: var(--bg-color); min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative;
-        }
-
-        /* 頂部導航 */
-        header {
-            background-color: var(--primary-color); color: var(--white); padding: 20px;
-            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
-        }
-
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .header-top h1 { font-size: 20px; font-weight: 600; }
-        .lang-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; }
-        .weather-time { display: flex; justify-content: space-between; font-size: 14px; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 10px; }
-
-        main { padding: 20px; padding-bottom: 20px; }
-
-        .section-title {
-            margin: 25px 0 15px; font-size: 18px; color: var(--text-dark);
-            border-left: 4px solid var(--primary-color); padding-left: 10px; font-weight: bold;
-        }
-
-        /* 九宮格導航 */
-        .quick-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px 10px; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-dark); }
-        .nav-icon {
-            width: 50px; height: 50px; background-color: var(--white); border-radius: 15px;
-            display: flex; justify-content: center; align-items: center; font-size: 20px;
-            color: var(--primary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 8px;
-            transition: transform 0.2s;
-        }
-        .nav-item:active .nav-icon { transform: scale(0.95); }
-        .nav-text { font-size: 12px; text-align: center; }
-
-        /* 旅遊必備清單樣式 */
-        .must-have-list { list-style: none; padding: 0; margin: 0; }
-        .must-have-item { display: flex; align-items: flex-start; margin-bottom: 12px; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .must-have-icon { font-size: 18px; color: var(--secondary-color); margin-right: 15px; margin-top: 2px; width: 24px; text-align: center; }
-        .must-have-text h4 { font-size: 14px; margin-bottom: 4px; color: var(--text-dark); }
-        .must-have-text p { font-size: 12px; color: var(--text-light); line-height: 1.5; margin: 0; }
-
-        /* 機場攻略卡片樣式 */
-        .content-card { background: var(--white); border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .airport-tab-btns { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; background: var(--bg-color); color: var(--text-light); font-weight: bold; cursor: pointer; }
-        .tab-btn.active { background: var(--primary-color); color: var(--white); }
-        .transport-method { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .transport-method:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .transport-title { font-weight: bold; color: #1a73e8; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
-
-        /* 頁腳 */
-        footer { 
-            text-align: center; padding: 30px 20px; color: var(--text-light); font-size: 13px; 
-            background: var(--white); border-top-left-radius: 20px; border-top-right-radius: 20px; 
-            margin-top: 10px; line-height: 1.6;
-        }
-        .footer-date { font-weight: bold; color: var(--text-dark); margin-bottom: 5px; }
-        .footer-social { margin: 15px 0; display: flex; justify-content: center; gap: 15px; }
-        .footer-social-icon { 
-            width: 32px; height: 32px; background: #333; color: white; border-radius: 8px; 
-            display: flex; align-items: center; justify-content: center; font-size: 16px; 
-            text-decoration: none;
-        }
+        .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 30px; }
+        header { background: linear-gradient(135deg, var(--primary), #b71c1c); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        header h1 { font-size: 22px; margin-bottom: 5px; }
+        .controls { padding: 15px; background: white; margin: -10px 15px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .filter-row { display: flex; gap: 10px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-row::-webkit-scrollbar { display: none; }
+        .chip { padding: 6px 15px; background: #eee; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .sort-select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; outline: none; background: #f9f9f9; }
+        .food-list { padding: 0 15px; }
+        .food-card { background: var(--white); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; position: relative; transition: 0.3s; border-left: 5px solid transparent; cursor: pointer; text-decoration: none; color: inherit; }
+        .food-card:active { transform: scale(0.98); background: #fafafa; }
+        .food-card.遊客推薦 { border-left-color: #2196F3; }
+        .food-card.當地人推薦 { border-left-color: #4CAF50; }
+        .food-card.評價推薦 { border-left-color: #FF9800; }
+        .food-info { flex: 1; }
+        .food-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .food-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 5px; }
+        .tag-遊客 { background: #E3F2FD; color: #1976D2; }
+        .tag-當地 { background: #E8F5E9; color: #2E7D32; }
+        .tag-評價 { background: #FFF3E0; color: #E65100; }
+        .star-rating { color: var(--star); font-size: 11px; margin-left: 5px; font-weight: bold; }
+        .food-name { font-size: 16px; font-weight: bold; color: var(--text); margin-bottom: 4px; }
+        .food-desc { font-size: 12px; color: var(--light-text); line-height: 1.4; margin-bottom: 8px; }
+        .food-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 8px; }
+        .food-price { color: var(--primary); font-weight: bold; font-size: 14px; }
+        .food-loc { font-size: 11px; color: #999; }
+        .map-hint { font-size: 10px; color: #aaa; text-align: center; margin-top: 10px; }
+        .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
     </style>
 </head>
 <body>
-
 <div class="app-container">
     <header>
-        <div class="header-top">
-            <h1>大阪通 - 深度旅行助手</h1>
-            <button class="lang-btn">EN</button>
-        </div>
-        <div class="weather-time">
-            <div id="current-time"><i class="far fa-clock"></i> 讀取中...</div>
-            <div><i class="fas fa-sun"></i> 大阪晴朗, 18°C</div>
-        </div>
+        <h1><i class="fas fa-utensils"></i> 沖繩美食推薦魔法師</h1>
+        <p>點擊餐廳卡片可開啟 Google Maps 導航</p>
     </header>
-
-    <main>
-        <h2 class="section-title">快速導航工具</h2>
-        <div class="quick-nav">
-            <a href="#airport" class="nav-item">
-                <div class="nav-icon"><i class="fas fa-plane-arrival"></i></div>
-                <div class="nav-text">機場攻略</div>
-            </a>
-            <a href="#" class="nav-item">
-                <div class="nav-icon"><i class="fas fa-subway"></i></div>
-                <div class="nav-text">交通規劃API太貴暫不做</div>
-            </a>
-            <a href="#" class="nav-item">
-                <div class="nav-icon"><i class="fas fa-ticket-alt"></i></div>
-                <div class="nav-text">周遊券</div>
-            </a>
-            <a href="osaka_magician.html" class="nav-item">
-                <div class="nav-icon" style="color: #e91e63;"><i class="fas fa-map-marked-alt"></i></div>
-                <div class="nav-text">行程魔法師</div>
-            </a>
-            <a href="food.html" class="nav-item">
-                <div class="nav-icon"><i class="fas fa-utensils"></i></div>
-                <div class="nav-text">美食推薦</div>
-            </a>
-            <a href="#" class="nav-item">
-                <div class="nav-icon"><i class="fas fa-shopping-bag"></i></div>
-                <div class="nav-text">購物必買</div>
-            </a>
-            <a href="accounting.html" class="nav-item">
-                <div class="nav-icon" style="color: #D32F2F;"><i class="fas fa-book"></i></div>
-                <div class="nav-text" style="font-weight:bold;">共用帳本</div>
-            </a>
-            <a href="#must-have" class="nav-item">
-                <div class="nav-icon"><i class="fas fa-suitcase"></i></div>
-                <div class="nav-text">旅遊必備</div>
-            </a>
+    <div class="controls">
+        <div class="filter-row" id="filterRow">
+            <div class="chip active" onclick="filterCat('全部')">全部</div>
+            <div class="chip" onclick="filterCat('阿古豬與肉類')">🥩 阿古豬/石垣牛</div>
+            <div class="chip" onclick="filterCat('沖繩麵與在地')">🍜 沖繩麵/海鮮</div>
+            <div class="chip" onclick="filterCat('海景甜點咖啡')">☕ 海景/甜點</div>
         </div>
-
-        <h2 class="section-title" id="airport">機場攻略</h2>
-        <div class="content-card">
-            <div class="airport-tab-btns">
-                <button class="tab-btn active">關西機場 (KIX)</button>
-                <button class="tab-btn">伊丹機場 (ITM)</button>
-            </div>
-            <div class="transport-method">
-                <div class="transport-title"><i class="fas fa-train"></i> (1) 南海電鐵 特急 Rapi:t</div>
-                <div style="font-size:13px; color:#666; line-height:1.6; margin-top:5px;">
-                    位置：第一航廈 2 樓鐵道車站。<br>
-                    時間：約 34-38 分鐘直達「難波站」。
-                </div>
-            </div>
-            <div class="transport-method">
-                <div class="transport-title"><i class="fas fa-subway"></i> (2) JR 關空特急 Haruka</div>
-                <div style="font-size:13px; color:#666; line-height:1.6; margin-top:5px;">
-                    位置：第一航廈 2 樓鐵道車站 (藍色閘口)。<br>
-                    路線：直達天王寺、新大阪、京都車站。
-                </div>
-            </div>
-        </div>
-
-        <h2 class="section-title" id="must-have">旅遊必備清單</h2>
-        <ul class="must-have-list">
-            <li class="must-have-item">
-                <div class="must-have-icon"><i class="fas fa-passport"></i></div>
-                <div class="must-have-text">
-                    <h4>護照與 VJW 條碼</h4>
-                    <p>護照效期需滿六個月。強烈建議提早填寫 Visit Japan Web 取得通關 QR Code。</p>
-                </div>
-            </li>
-            <li class="must-have-item">
-                <div class="must-have-icon"><i class="fas fa-wifi"></i></div>
-                <div class="must-have-text">
-                    <h4>上網 SIM 卡 / eSIM</h4>
-                    <p>查 Google 地圖、乘換案內、翻譯菜單必備工具。</p>
-                </div>
-            </li>
-            <li class="must-have-item">
-                <div class="must-have-icon"><i class="far fa-credit-card"></i></div>
-                <div class="must-have-text">
-                    <h4>ICOCA 或 Suica 交通卡</h4>
-                    <p>搭乘地鐵與超商付款神器，iPhone 用戶可直接綁定 Apple Pay。</p>
-                </div>
-            </li>
-            <li class="must-have-item">
-                <div class="must-have-icon"><i class="fas fa-coins"></i></div>
-                <div class="must-have-text">
-                    <h4>日幣現金與零錢包</h4>
-                    <p>多數大型商店可刷卡，但黑門市場、拉麵食券機、神社參拜仍需使用現金。</p>
-                </div>
-            </li>
-            <li class="must-have-item">
-                <div class="must-have-icon"><i class="fas fa-shoe-prints"></i></div>
-                <div class="must-have-text">
-                    <h4>好穿的健走鞋</h4>
-                    <p>在日本自由行每天平均步數 1.5 萬到 2 萬步，一雙舒適的鞋子是救星。</p>
-                </div>
-            </li>
-        </ul>
-    </main>
-
-    <footer>
-        <div class="footer-date">31,Aug-04,Sep</div>
-        <div>自由選擇<br>寫下專屬我們的大阪旅行故事。</div>
-        <div class="footer-social">
-            <a href="https://www.instagram.com/mengchi1570/" target="_blank" class="footer-social-icon"><i class="fab fa-instagram"></i></a>
-            <a href="https://line.me/ti/p/~mengchi1105" target="_blank" class="footer-social-icon"><i class="fab fa-line"></i></a>
-        </div>
-        <div style="font-size:12px; margin-bottom:10px;">聯絡方式：<br>Line : mengchi1105<br>Instagram : mengchi1570</div>
-        <div style="opacity: 0.6;">&copy; 2026 大阪通 - 深度旅行助手</div>
-    </footer>
+        <select class="sort-select" id="sortSelect" onchange="renderFood()">
+            <option value="popularity">🔥 按熱門度排序 (推薦等級)</option>
+            <option value="price_low">💰 價位：由低到高</option>
+            <option value="price_high">💎 價位：由高到低</option>
+        </select>
+    </div>
+    <div class="food-list" id="foodList"></div>
+    <div class="map-hint">💡 點擊上方任何餐廳可直接開啟 Google 地圖導航</div>
+    <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
-
 <script>
-    function updateOsakaTime() {
-        const timeElement = document.getElementById('current-time');
-        const now = new Date();
-        const osakaTimeOptions = { timeZone: 'Asia/Tokyo', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
-        const formatter = new Intl.DateTimeFormat('zh-TW', osakaTimeOptions);
-        const parts = formatter.formatToParts(now);
-        let month = '', day = '', hour = '', minute = '';
-        parts.forEach(part => {
-            if(part.type === 'month') month = part.value;
-            if(part.type === 'day') day = part.value;
-            if(part.type === 'hour') hour = part.value;
-            if(part.type === 'minute') minute = part.value;
+    const foodDB = [
+        { name: "百年古家 大家", type: "阿古豬與肉類", cat: "遊客推薦", area: "名護市", price: 3500, desc: "在百年琉球古民家裡享受頂級阿古豬涮涮鍋，氣氛滿分", weight: 1, star: "" },
+        { name: "燒肉 Motobu牧場", type: "阿古豬與肉類", cat: "評價推薦", area: "本部町", price: 6000, desc: "沖繩本部牛頂級燒肉，肉質鮮嫩多汁，在地高分首選", weight: 2, star: "★★★★★" },
+        { name: "琉球新麵 通堂", type: "沖繩麵與在地", cat: "遊客推薦", area: "那霸市", price: 1000, desc: "經典招牌男人麵（濃郁豚骨）與女人麵（清爽鹽味）", weight: 1, star: "" },
+        { name: "幸福鬆餅 瀨長島店", type: "海景甜點咖啡", cat: "遊客推薦", area: "豐見城市", price: 1600, desc: "瀨長島純白希臘風建築，邊看海景邊吃極致蓬鬆鬆餅", weight: 1, star: "" },
+        { name: "岸本食堂 きしもと食堂", type: "沖繩麵與在地", cat: "當地人推薦", area: "本部町", price: 800, desc: "百年木炭傳統製法沖繩麵，手擀麵條極具嚼勁", weight: 3, star: "" },
+        { name: "蝦蝦飯 Kouri Shrimp", type: "沖繩麵與在地", cat: "評價推薦", area: "古宇利島", price: 1500, desc: "古宇利島爆紅夏威夷蒜香蝦飯，搭上海景超級對味", weight: 2, star: "★★★★☆" },
+        { name: "Blue Seal 牧港本店", type: "海景甜點咖啡", cat: "遊客推薦", area: "浦添市", price: 500, desc: "沖繩美式復古風冰淇淋，必吃紅芋與鹽屋雪鹽口味", weight: 1, star: "" },
+        { name: "港川外人住宅 榮町市場居酒屋", type: "沖繩麵與在地", cat: "當地人推薦", area: "浦添市/那霸", price: 2500, desc: "深夜體驗沖繩在地Orion生啤酒與傳統炒苦瓜、海葡萄", weight: 3, star: "" }
+    ];
+    let currentCat = '全部';
+    function filterCat(cat) {
+        currentCat = cat;
+        const chips = document.querySelectorAll('.chip');
+        chips.forEach(c => {
+            if(c.innerText.includes(cat.substring(0,2))) c.classList.add('active');
+            else c.classList.remove('active');
         });
-        const dayOfWeek = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'][new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"})).getDay()];
-        timeElement.innerHTML = `<i class="far fa-clock"></i> ${month}/${day} (${dayOfWeek}) ${hour}:${minute} (大阪時間)`;
+        if(cat === '全部') chips[0].classList.add('active');
+        renderFood();
     }
-    updateOsakaTime();
-    setInterval(updateOsakaTime, 60000);
+    function renderFood() {
+        const listEl = document.getElementById('foodList');
+        const sortBy = document.getElementById('sortSelect').value;
+        let filtered = foodDB.filter(item => currentCat === '全部' || item.type === currentCat);
+        filtered.sort((a, b) => {
+            if(sortBy === 'popularity') return b.weight - a.weight;
+            if(sortBy === 'price_low') return a.price - b.price;
+            if(sortBy === 'price_high') return b.price - a.price;
+        });
+        listEl.innerHTML = filtered.map(item => {
+            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 沖繩')}`;
+            const starHtml = item.cat === "評價推薦" ? `<span class="star-rating">${item.star}</span>` : "";
+            return `
+                <a href="${googleMapUrl}" target="_blank" class="food-card ${item.cat}">
+                    <div class="food-info">
+                        <div class="food-header">
+                            <span class="food-tag tag-${item.cat.substring(0,2)}">${item.cat}</span>
+                            ${starHtml}
+                        </div>
+                        <div class="food-name">${item.name}</div>
+                        <div class="food-desc">${item.desc}</div>
+                        <div class="food-meta">
+                            <div class="food-price">¥ ${item.price.toLocaleString()} ~</div>
+                            <div class="food-loc"><i class="fas fa-map-marker-alt"></i> ${item.area}</div>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }).join('');
+    }
+    renderFood();
 </script>
-
 </body>
 </html>
