@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<script>
-	// 初始化 Supabase
-	const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
-	const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
-	const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // 初始化 Supabase
+        const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大阪通 - 美食推薦魔法師</title>
+    <title>沖繩自駕趣 - 美食推薦魔法師</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -20,91 +20,49 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; }
         body { background-color: #e0e5ec; display: flex; justify-content: center; }
-        
-        .app-container {
-            width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 30px;
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--primary), #b71c1c); color: white;
-            padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-        }
+        .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 30px; }
+        header { background: linear-gradient(135deg, var(--primary), #b71c1c); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
         header h1 { font-size: 22px; margin-bottom: 5px; }
-
         .controls { padding: 15px; background: white; margin: -10px 15px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .filter-row { display: flex; gap: 10px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .filter-row::-webkit-scrollbar { display: none; }
-        
-        .chip {
-            padding: 6px 15px; background: #eee; border-radius: 20px; font-size: 13px;
-            white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid transparent;
-        }
+        .chip { padding: 6px 15px; background: #eee; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        .sort-select {
-            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd;
-            font-size: 14px; outline: none; background: #f9f9f9;
-        }
-
+        .sort-select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; outline: none; background: #f9f9f9; }
         .food-list { padding: 0 15px; }
-        .food-card {
-            background: var(--white); border-radius: 15px; padding: 15px; margin-bottom: 15px;
-            display: flex; gap: 15px; position: relative; transition: 0.3s;
-            border-left: 5px solid transparent; cursor: pointer;
-            text-decoration: none; color: inherit;
-        }
+        .food-card { background: var(--white); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; position: relative; transition: 0.3s; border-left: 5px solid transparent; cursor: pointer; text-decoration: none; color: inherit; }
         .food-card:active { transform: scale(0.98); background: #fafafa; }
-        
         .food-card.遊客推薦 { border-left-color: #2196F3; }
         .food-card.當地人推薦 { border-left-color: #4CAF50; }
         .food-card.評價推薦 { border-left-color: #FF9800; }
-
         .food-info { flex: 1; }
         .food-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .food-tag {
-            font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold;
-            display: inline-block; margin-bottom: 5px;
-        }
+        .food-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 5px; }
         .tag-遊客 { background: #E3F2FD; color: #1976D2; }
         .tag-當地 { background: #E8F5E9; color: #2E7D32; }
         .tag-評價 { background: #FFF3E0; color: #E65100; }
-
         .star-rating { color: var(--star); font-size: 11px; margin-left: 5px; font-weight: bold; }
-
         .food-name { font-size: 16px; font-weight: bold; color: var(--text); margin-bottom: 4px; }
         .food-desc { font-size: 12px; color: var(--light-text); line-height: 1.4; margin-bottom: 8px; }
-        
         .food-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 8px; }
         .food-price { color: var(--primary); font-weight: bold; font-size: 14px; }
         .food-loc { font-size: 11px; color: #999; }
-
         .map-hint { font-size: 10px; color: #aaa; text-align: center; margin-top: 10px; }
-
-        .back-home {
-            position: fixed; bottom: 20px; right: 20px; background: var(--text);
-            color: white; width: 50px; height: 50px; border-radius: 25px;
-            display: flex; justify-content: center; align-items: center;
-            text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100;
-        }
+        .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
     </style>
 </head>
 <body>
-
 <div class="app-container">
     <header>
-        <h1><i class="fas fa-utensils"></i> 大阪通美食魔法師</h1>
+        <h1><i class="fas fa-utensils"></i> 沖繩美食推薦魔法師</h1>
         <p>點擊餐廳卡片可開啟 Google Maps 導航</p>
     </header>
-
     <div class="controls">
         <div class="filter-row" id="filterRow">
             <div class="chip active" onclick="filterCat('全部')">全部</div>
-	    <div class="chip" onclick="filterCat('抹茶專門')">🍵 抹茶專門</div>
-            <div class="chip" onclick="filterCat('日式料理')">🍱 日式</div>
-            <div class="chip" onclick="filterCat('西式與創意')">🍝 西式/法義</div>
-            <div class="chip" onclick="filterCat('甜點咖啡')">🍵 甜點/咖啡</div>
-            <div class="chip" onclick="filterCat('在地小吃')">🍢 小吃/大阪燒</div>
+            <div class="chip" onclick="filterCat('阿古豬與肉類')">🥩 阿古豬/石垣牛</div>
+            <div class="chip" onclick="filterCat('沖繩麵與在地')">🍜 沖繩麵/海鮮</div>
+            <div class="chip" onclick="filterCat('海景甜點咖啡')">☕ 海景/甜點</div>
         </div>
         <select class="sort-select" id="sortSelect" onchange="renderFood()">
             <option value="popularity">🔥 按熱門度排序 (推薦等級)</option>
@@ -112,66 +70,22 @@
             <option value="price_high">💎 價位：由高到低</option>
         </select>
     </div>
-
-    <div class="food-list" id="foodList">
-        </div>
-    
-    <div class="map-hint">💡 點擊上方任何餐廳可直接開啟 Google 地圖搜尋</div>
-
+    <div class="food-list" id="foodList"></div>
+    <div class="map-hint">💡 點擊上方任何餐廳可直接開啟 Google 地圖導航</div>
     <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
-
 <script>
     const foodDB = [
-	{ name: "中村藤吉 本店", type: "抹茶專門", cat: "評價推薦", area: "京都 (宇治)", price: 2500, desc: "宇治抹茶界的天花板，招牌生茶果凍必吃", weight: 2, star: "★★★★★" },
-	{ name: "伊藤久右衛門", type: "抹茶專門", cat: "遊客推薦", area: "京都 (宇治)", price: 1800, desc: "精緻抹茶聖代與多樣化抹茶伴手禮", weight: 1, star: "" },
-	{ name: "辻利 祇園本店", type: "抹茶專門", cat: "遊客推薦", area: "京都 (祇園)", price: 1500, desc: "祇園地標級抹茶老店，推薦特製聖代", weight: 1, star: "" },
-	{ name: "茶寮都路里", type: "抹茶專門", cat: "評價推薦", area: "京都/大阪", price: 1600, desc: "高品質宇治抹茶專賣，濃郁口感的首選", weight: 2, star: "★★★★☆" },
-	{ name: "Wad Omotenashi Cafe", type: "抹茶專門", cat: "當地人推薦", area: "大阪 (心齋橋)", price: 2000, desc: "現代與傳統結合的茶屋，抹茶與陶器美學", weight: 3, star: "" },
-	{ name: "菓匠 祝 (Kashō Iwai)", type: "抹茶專門", cat: "當地人推薦", area: "奈良", price: 1200, desc: "大和抹茶刨冰與精緻大福，在地人首選", weight: 3, star: "" },
-	{ name: "Nana's Green Tea", type: "抹茶專門", cat: "遊客推薦", area: "大阪 (梅田)", price: 1400, desc: "抹茶界的星巴克，適合快速享受高品質抹茶", weight: 1, star: "" },
-	{ name: "茶匠清水一芳園 本店", type: "抹茶專門", cat: "當地人推薦", area: "京都 (東山)", price: 1200, desc: "【必點：抹茶慕斯刨冰】專業茶商直營，主打極致濃郁的抹茶泡泡感", weight: 3, star: "" },
-	{ name: "丸久小山園 西洞院店", type: "抹茶專門", cat: "當地人推薦", area: "京都 (中京區)", price: 1500, desc: "【必點：抹茶蛋糕捲】極具美學的茶室空間，抹茶控公認的口感王者", weight: 3, star: "" },
-	{ name: "MACCHA HOUSE 抹茶館 京都河原町", type: "抹茶專門", cat: "遊客推薦", area: "京都 (河原町)", price: 900, desc: "【必點：升級版抹茶提拉米蘇】用升官酒木盒裝盛，視覺與美味兼具", weight: 1, star: "" },
-	{ name: "Matcha Republic (抹茶共和國)", type: "抹茶專門", cat: "當地人推薦", area: "京都 (宇治)", price: 850, desc: "【必點：墨水瓶抹茶】將抹茶裝進墨水瓶中，宇治最吸睛的網美打卡店", weight: 3, star: "" },
-	{ name: "通圓本店 (通圓茶屋)", type: "抹茶專門", cat: "當地人推薦", area: "京都 (宇治)", price: 1000, desc: "【必點：抹茶糰子】日本最古老的茶屋（西元 1160 年創立），充滿歷史感", weight: 3, star: "" },
-	{ name: "Wad Omotenashi Cafe", type: "抹茶專門", cat: "當地人推薦", area: "大阪 (心齋橋)", price: 2000, desc: "【必點：手刷抹茶】結合當代陶瓷藝術與傳統茶道，非常有質感的抹茶空間", weight: 3, star: "" },
-        { name: "麵屋丈六", type: "日式料理", cat: "當地人推薦", area: "大阪 (難波)", price: 1000, desc: "濃郁高井田風醬油拉麵 (難波第一名)", weight: 3, star: "" },
-        { name: "本家第一旭 本店", type: "日式料理", cat: "當地人推薦", area: "京都車站", price: 1100, desc: "創立於 1947 年的京風拉麵", weight: 3, star: "" },
-        { name: "空蟬亭", type: "日式料理", cat: "評價推薦", area: "京都", price: 3500, desc: "Tabelog 第一高分、米其林推薦炸豬排", weight: 2, star: "★★★★★" },
-        { name: "玄品河豚", type: "日式料理", cat: "遊客推薦", area: "大阪/京都", price: 6000, desc: "CP 值極高的連鎖河豚專賣店", weight: 1, star: "" },
-        { name: "弘燒肉", type: "日式料理", cat: "評價推薦", area: "京都", price: 6500, desc: "買斷整頭牛的高品質燒肉 (京之燒肉 弘)", weight: 2, star: "★★★★☆" },
-        { name: "さかえすし", type: "日式料理", cat: "當地人推薦", area: "大阪 (玉屋町)", price: 4500, desc: "深夜排隊平價壽司", weight: 3, star: "" },
-        { name: "うなぎ屋 廣川", type: "日式料理", cat: "評價推薦", area: "京都 (嵐山)", price: 7500, desc: "米其林一星、嵐山傳奇鰻魚飯", weight: 2, star: "★★★★★" },
-        { name: "天婦羅 天星", type: "日式料理", cat: "當地人推薦", area: "大阪", price: 15000, desc: "專精節令食材的高級天婦羅", weight: 3, star: "" },
-        { name: "蟹道樂", type: "日式料理", cat: "遊客推薦", area: "大阪 (道頓堀)", price: 10000, desc: "經典螃蟹全席料理", weight: 1, star: "" },
-        { name: "中村屋可樂餅", type: "西式與創意", cat: "當地人推薦", area: "大阪 (天神橋)", price: 200, desc: "商店街傳奇、爆汁平價小吃", weight: 3, star: "" },
-        { name: "牛かつもと村", type: "西式與創意", cat: "遊客推薦", area: "大阪 (難波)", price: 2800, desc: "排隊不間斷的炸牛排專賣", weight: 1, star: "" },
-        { name: "Le Bistro Queue de Porc", type: "西式與創意", cat: "當地人推薦", area: "大阪", price: 6000, desc: "1983 年創立的溫馨法餐", weight: 3, star: "" },
-        { name: "儘 MAMA", type: "西式與創意", cat: "評價推薦", area: "京都 (嵐山)", price: 4000, desc: "隱身嵐山豪宅內的義大利窯烤比薩", weight: 2, star: "★★★★☆" },
-        { name: "洋食とワイン Ao.", type: "西式與創意", cat: "當地人推薦", area: "京都", price: 6000, desc: "精緻洋食配紅白酒", weight: 3, star: "" },
-        { name: "出町雙葉", type: "甜點咖啡", cat: "當地人推薦", area: "京都", price: 350, desc: "每天排隊的豆大福老店", weight: 3, star: "" },
-        { name: "大佛布丁", type: "甜點咖啡", cat: "評價推薦", area: "奈良", price: 500, desc: "奈良象徵、口感極致絲滑", weight: 2, star: "★★★★★" },
-        { name: "OSA Coffee", type: "甜點咖啡", cat: "當地人推薦", area: "大阪 (中崎町)", price: 1200, desc: "冰淇淋疊在布丁上，視覺滿分", weight: 3, star: "" },
-        { name: "Afternoon Tea LOVE & TABLE", type: "甜點咖啡", cat: "遊客推薦", area: "大阪 (梅田)", price: 2200, desc: "爆紅水果千層蛋糕", weight: 1, star: "" },
-        { name: "麵鬪庵", type: "在地小吃", cat: "當地人推薦", area: "奈良", price: 1400, desc: "視覺滿分的豆皮福袋烏龍麵", weight: 3, star: "" },
-        { name: "千房大阪燒", type: "在地小吃", cat: "遊客推薦", area: "大阪", price: 2200, desc: "經典大阪燒花式淋醬秀", weight: 1, star: "" },
-        { name: "人類大家都是麵", type: "日式料理", cat: "當地人推薦", area: "大阪 (南方)", price: 1100, desc: "極厚叉燒拉麵，大排長龍名店", weight: 3, star: "" },
-        { name: "一蘭拉麵", type: "日式料理", cat: "遊客推薦", area: "大阪/京都", price: 1200, desc: "經典豚骨拉麵 (24小時)", weight: 1, star: "" },
-        { name: "國產牛燒肉 Aburiya", type: "日式料理", cat: "評價推薦", area: "大阪", price: 5500, desc: "高CP值和牛吃到飽", weight: 2, star: "★★★★☆" },
-        { name: "志津香釜飯", type: "在地小吃", cat: "遊客推薦", area: "奈良", price: 3200, desc: "奈良必吃排隊釜飯", weight: 1, star: "" },
-        { name: "北極星蛋包飯", type: "西式與創意", cat: "遊客推薦", area: "大阪 (心齋橋)", price: 1500, desc: "據傳為日本蛋包飯創始店", weight: 1, star: "" },
-        { name: "東洋亭", type: "西式與創意", cat: "評價推薦", area: "京都/大阪", price: 2000, desc: "招牌漢堡排與整顆番茄沙拉", weight: 2, star: "★★★★☆" },
-        { name: "中谷堂", type: "甜點咖啡", cat: "當地人推薦", area: "奈良", price: 350, desc: "現搗紅豆艾草麻糬", weight: 3, star: "" },
-        { name: "HARBS", type: "甜點咖啡", cat: "遊客推薦", area: "大阪/京都", price: 1600, desc: "招牌水果千層蛋糕，名媛下午茶", weight: 1, star: "" },
-        { name: "甲賀流章魚燒", type: "在地小吃", cat: "當地人推薦", area: "大阪 (美國村)", price: 650, desc: "美國村年輕人最愛", weight: 3, star: "" },
-        { name: "達摩串炸", type: "在地小吃", cat: "遊客推薦", area: "大阪", price: 2500, desc: "串炸靈魂名店，元祖級美味", weight: 1, star: "" },
-        { name: "福太郎大阪燒", type: "在地小吃", cat: "評價推薦", area: "大阪 (難波)", price: 2000, desc: "蔥燒與大阪燒的高分首選", weight: 2, star: "★★★★☆" },
-        { name: "美津濃", type: "在地小吃", cat: "當地人推薦", area: "大阪 (道頓堀)", price: 2400, desc: "米其林推薦的山芋燒", weight: 3, star: "" }
+        { name: "百年古家 大家", type: "阿古豬與肉類", cat: "遊客推薦", area: "名護市", price: 3500, desc: "在百年琉球古民家裡享受頂級阿古豬涮涮鍋，氣氛滿分", weight: 1, star: "" },
+        { name: "燒肉 Motobu牧場", type: "阿古豬與肉類", cat: "評價推薦", area: "本部町", price: 6000, desc: "沖繩本部牛頂級燒肉，肉質鮮嫩多汁，在地高分首選", weight: 2, star: "★★★★★" },
+        { name: "琉球新麵 通堂", type: "沖繩麵與在地", cat: "遊客推薦", area: "那霸市", price: 1000, desc: "經典招牌男人麵（濃郁豚骨）與女人麵（清爽鹽味）", weight: 1, star: "" },
+        { name: "幸福鬆餅 瀨長島店", type: "海景甜點咖啡", cat: "遊客推薦", area: "豐見城市", price: 1600, desc: "瀨長島純白希臘風建築，邊看海景邊吃極致蓬鬆鬆餅", weight: 1, star: "" },
+        { name: "岸本食堂 きしもと食堂", type: "沖繩麵與在地", cat: "當地人推薦", area: "本部町", price: 800, desc: "百年木炭傳統製法沖繩麵，手擀麵條極具嚼勁", weight: 3, star: "" },
+        { name: "蝦蝦飯 Kouri Shrimp", type: "沖繩麵與在地", cat: "評價推薦", area: "古宇利島", price: 1500, desc: "古宇利島爆紅夏威夷蒜香蝦飯，搭上海景超級對味", weight: 2, star: "★★★★☆" },
+        { name: "Blue Seal 牧港本店", type: "海景甜點咖啡", cat: "遊客推薦", area: "浦添市", price: 500, desc: "沖繩美式復古風冰淇淋，必吃紅芋與鹽屋雪鹽口味", weight: 1, star: "" },
+        { name: "港川外人住宅 榮町市場居酒屋", type: "沖繩麵與在地", cat: "當地人推薦", area: "浦添市/那霸", price: 2500, desc: "深夜體驗沖繩在地Orion生啤酒與傳統炒苦瓜、海葡萄", weight: 3, star: "" }
     ];
-
     let currentCat = '全部';
-
     function filterCat(cat) {
         currentCat = cat;
         const chips = document.querySelectorAll('.chip');
@@ -182,26 +96,18 @@
         if(cat === '全部') chips[0].classList.add('active');
         renderFood();
     }
-
     function renderFood() {
         const listEl = document.getElementById('foodList');
         const sortBy = document.getElementById('sortSelect').value;
-        
         let filtered = foodDB.filter(item => currentCat === '全部' || item.type === currentCat);
-
         filtered.sort((a, b) => {
             if(sortBy === 'popularity') return b.weight - a.weight;
             if(sortBy === 'price_low') return a.price - b.price;
             if(sortBy === 'price_high') return b.price - a.price;
         });
-
         listEl.innerHTML = filtered.map(item => {
-            // 點擊卡片跳轉 Google Map 搜尋店名 + 地區
-            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' ' + item.area)}`;
-            
-            // 如果是評價推薦，顯示星星
+            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 沖繩')}`;
             const starHtml = item.cat === "評價推薦" ? `<span class="star-rating">${item.star}</span>` : "";
-
             return `
                 <a href="${googleMapUrl}" target="_blank" class="food-card ${item.cat}">
                     <div class="food-info">
@@ -220,9 +126,7 @@
             `;
         }).join('');
     }
-
     renderFood();
 </script>
-
 </body>
 </html>
