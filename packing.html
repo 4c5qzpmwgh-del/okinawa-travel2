@@ -15,78 +15,115 @@
         .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; position: relative; padding-bottom: 40px; }
         header { background: linear-gradient(135deg, var(--secondary), #7c3aed); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
         header h1 { font-size: 22px; margin-bottom: 5px; }
+        .add-box-card { padding: 15px; background: white; margin: -10px 15px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px dashed var(--secondary); }
+        .form-grid { display: flex; gap: 8px; }
+        .form-grid input, .form-grid select { padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+        .form-grid input { flex: 1; }
+        .btn-form-add { padding: 8px 12px; background: var(--secondary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
         .category-section { padding: 15px; }
         .cat-card { background: var(--white); border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .cat-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
-        .cat-title i { color: var(--secondary); }
         .item-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #fafafa; cursor: pointer; }
-        .item-row:last-child { border-bottom: none; }
-        .checkbox-custom { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; margin-right: 12px; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .checkbox-custom { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; margin-right: 12px; display: flex; justify-content: center; align-items: center; }
         .item-row.checked .checkbox-custom { background: var(--secondary); border-color: var(--secondary); }
         .item-row.checked .checkbox-custom::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: white; font-size: 11px; }
         .item-name { font-size: 14px; color: var(--text); font-weight: 500; }
         .item-row.checked .item-name { color: #94a3b8; text-decoration: line-through; }
-        .item-note { font-size: 11px; color: #a1a1aa; margin-left: auto; font-style: italic; }
+        .item-note { font-size: 11px; color: #a1a1aa; margin-left: 10px; font-style: italic; }
+        .btn-item-del { margin-left: auto; background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; font-size: 13px; opacity: 0.5; transition: 0.2s; }
+        .btn-item-del:hover { opacity: 1; }
         .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
     </style>
 </head>
 <body>
-
 <div class="app-container">
     <header>
         <h1><i class="fas fa-luggage-cart"></i> 沖繩自駕行李神隊友</h1>
-        <p>自駕必備、浮潛防曬裝備智慧檢查清單</p>
+        <p>自由新增、刪除物品，打造專屬清單</p>
     </header>
 
-    <main class="category-section" id="listContainer"></main>
+    <!-- 自由新增行李項目 -->
+    <div class="add-box-card">
+        <div class="form-grid">
+            <input type="text" id="itemName" placeholder="自訂要帶的物品名稱...">
+            <select id="itemCat">
+                <option value="🪪 必備重要證件">重要證件</option>
+                <option value="🚗 自駕與數位裝備">數位裝備</option>
+                <option value="🏊‍♂️ 沖繩海灘與水上活動">水上活動</option>
+            </select>
+            <button class="btn-form-add" onclick="addItem()">➕ 新增</button>
+        </div>
+    </div>
 
+    <main class="category-section" id="listContainer"></main>
     <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
-
 <script>
-    // 專為沖繩夏日自駕量身打造的打包清單資料庫
-    const packingData = {
-        "🪪 必備重要證件 (漏了絕對出不了關)": [
+    // 初始清單
+    const defaultPacking = {
+        "🪪 必備重要證件": [
             { name: "台灣駕照正本", note: "自駕靈魂！沒帶取不了車" },
             { name: "日文駕照譯本", note: "需在監理所事先辦妥" },
-            { name: "護照正本", note: "效期需滿6個月以上" },
-            { name: "信用卡與日圓現金", note: "OTS租車與小吃攤必備" }
+            { name: "護照正本", note: "效期需滿6個月以上" }
         ],
         "🚗 自駕與數位裝備": [
-            { name: "手機車用支架", note: "看 Google Maps 超方便" },
-            { name: "車充 / USB 充電線", note: "自駕導航手機必備補血" },
-            { name: "隨身 Wi-Fi 或 eSIM", note: "自駕查路絕對不能斷網" },
-            { name: "行動電源", note: "海灘拍照一整天必備" }
+            { name: "手機車用支架", note: "看地圖必備" },
+            { name: "隨身 Wi-Fi 或 eSIM", note: "自駕查路絕不能中斷" }
         ],
         "🏊‍♂️ 沖繩海灘與水上活動": [
-            { name: "泳衣 / 泳褲 / 水母衣", note: "青之洞窟浮潛必備" },
-            { name: "防水袋 / 手機防水殼", note: "海邊戲水防沙防海水" },
-            { name: "海洋友善防曬乳", note: "保護沖繩美麗的珊瑚礁" },
-            { name: "大毛巾 / 海灘拖鞋", note: "古宇利島踩水上岸擦拭" }
+            { name: "泳衣物 / 水母衣", note: "青之洞窟浮潛" },
+            { name: "海洋友善防曬乳", note: "保護美麗珊瑚礁" }
         ]
     };
 
-    // 自動從 LocalStorage 讀取已打勾的狀態
+    // 如果 localStorage 沒有資料，就拿預設資料初始化
+    let currentPackingData = JSON.parse(localStorage.getItem('okinawa_packing_data')) || defaultPacking;
     let checkedItems = JSON.parse(localStorage.getItem('okinawa_packing_status')) || [];
 
     function renderList() {
         const container = document.getElementById('listContainer');
         let html = '';
 
-        for (const [cat, items] of Object.entries(packingData)) {
+        for (const [cat, items] of Object.entries(currentPackingData)) {
+            if(items.length === 0) continue;
             html += `<div class="cat-card"><div class="cat-title">${cat}</div>`;
-            items.forEach(item => {
+            items.forEach((item, idx) => {
                 const isChecked = checkedItems.includes(item.name);
                 html += `
                     <div class="item-row ${isChecked ? 'checked' : ''}" onclick="toggleItem('${item.name}')">
                         <div class="checkbox-custom"></div>
                         <div class="item-name">${item.name}</div>
-                        <div class="item-note">${item.note}</div>
+                        <div class="item-note">${item.note || ''}</div>
+                        <button class="btn-item-del" onclick="deleteItem('${cat}', ${idx}, event)"><i class="fas fa-trash-alt"></i></button>
                     </div>`;
             });
             html += `</div>`;
         }
         container.innerHTML = html;
+    }
+
+    function addItem() {
+        const name = document.getElementById('itemName').value.trim();
+        if(!name) return alert('請輸入物品名稱！');
+        const cat = document.getElementById('itemCat').value;
+
+        if(!currentPackingData[cat]) currentPackingData[cat] = [];
+        currentPackingData[cat].push({ name: name, note: "自訂項目" });
+        
+        localStorage.setItem('okinawa_packing_data', JSON.stringify(currentPackingData));
+        document.getElementById('itemName').value = '';
+        renderList();
+    }
+
+    function deleteItem(cat, idx, e) {
+        e.stopPropagation(); // 防止觸發打勾事件
+        if(confirm('確定要刪除這個物品嗎？')) {
+            const removed = currentPackingData[cat].splice(idx, 1);
+            checkedItems = checkedItems.filter(i => i !== removed[0].name); // 同步把打勾紀錄移除
+            localStorage.setItem('okinawa_packing_data', JSON.stringify(currentPackingData));
+            localStorage.setItem('okinawa_packing_status', JSON.stringify(checkedItems));
+            renderList();
+        }
     }
 
     function toggleItem(name) {
@@ -101,6 +138,5 @@
 
     renderList();
 </script>
-
 </body>
 </html>
