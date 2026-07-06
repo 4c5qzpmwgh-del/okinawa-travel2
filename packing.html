@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>沖繩自駕趣 - 智慧行李打包檢查表</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // 初始化 Supabase 連線
+        const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7'; 
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
     <style>
         :root {
             --primary: #D32F2F; --secondary: #8b5cf6; --bg: #F4F6F8;
@@ -15,23 +22,24 @@
         .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; position: relative; padding-bottom: 40px; }
         header { background: linear-gradient(135deg, var(--secondary), #7c3aed); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
         header h1 { font-size: 22px; margin-bottom: 5px; }
-        .add-box-card { padding: 15px; background: white; margin: -10px 15px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px dashed var(--secondary); }
+        .add-box-card { padding: 15px; background: white; margin: 15px 15px 5px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px dashed var(--secondary); }
+        .form-title { font-size: 13px; font-weight: bold; color: var(--secondary); margin-bottom: 8px; }
         .form-grid { display: flex; gap: 8px; }
-        .form-grid input, .form-grid select { padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+        .form-grid input, .form-grid select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; outline: none; }
         .form-grid input { flex: 1; }
-        .btn-form-add { padding: 8px 12px; background: var(--secondary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .btn-form-add { padding: 10px 16px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
         .category-section { padding: 15px; }
         .cat-card { background: var(--white); border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
         .cat-title { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
-        .item-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #fafafa; cursor: pointer; }
-        .checkbox-custom { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px; margin-right: 12px; display: flex; justify-content: center; align-items: center; }
+        .item-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #fcfcfc; cursor: pointer; position: relative; }
+        .checkbox-custom { width: 22px; height: 22px; border: 2px solid #cbd5e1; border-radius: 6px; margin-right: 12px; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
         .item-row.checked .checkbox-custom { background: var(--secondary); border-color: var(--secondary); }
         .item-row.checked .checkbox-custom::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: white; font-size: 11px; }
-        .item-name { font-size: 14px; color: var(--text); font-weight: 500; }
+        .item-name { font-size: 14px; color: var(--text); font-weight: 500; padding-right: 40px; }
         .item-row.checked .item-name { color: #94a3b8; text-decoration: line-through; }
-        .item-note { font-size: 11px; color: #a1a1aa; margin-left: 10px; font-style: italic; }
-        .btn-item-del { margin-left: auto; background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; font-size: 13px; opacity: 0.5; transition: 0.2s; }
-        .btn-item-del:hover { opacity: 1; }
+        .item-note { font-size: 12px; color: #a1a1aa; margin-left: auto; padding-right: 35px; font-style: italic; }
+        .item-row.checked .item-note { color: #cbd5e1; }
+        .btn-item-del { position: absolute; right: 0; top: 10px; background: #fee2e2; border: none; color: #ef4444; cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; z-index: 10; }
         .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
     </style>
 </head>
@@ -39,19 +47,20 @@
 <div class="app-container">
     <header>
         <h1><i class="fas fa-luggage-cart"></i> 沖繩自駕行李神隊友</h1>
-        <p>自由新增、刪除物品，打造專屬清單</p>
+        <p>自駕必備、浮潛防曬裝備智慧檢查清單</p>
     </header>
 
-    <!-- 自由新增行李項目 -->
+    <!-- 自由新增行李項目輸入欄位 -->
     <div class="add-box-card">
+        <div class="form-title"><i class="fas fa-plus-circle"></i> 新增自訂物品至指定清單</div>
         <div class="form-grid">
-            <input type="text" id="itemName" placeholder="自訂要帶的物品名稱...">
+            <input type="text" id="itemName" placeholder="例如：萬用插頭、防水相機...">
             <select id="itemCat">
-                <option value="🪪 必備重要證件">重要證件</option>
+                <option value="🪪 必備重要證件 (漏了絕對出不了關)">重要證件</option>
                 <option value="🚗 自駕與數位裝備">數位裝備</option>
-                <option value="🏊‍♂️ 沖繩海灘與水上活動">水上活動</option>
+                <option value="🏊‍♂️ 沖繩海灘與水水上活動">水上活動</option>
             </select>
-            <button class="btn-form-add" onclick="addItem()">➕ 新增</button>
+            <button class="btn-form-add" onclick="addItem()">新增</button>
         </div>
     </div>
 
@@ -59,42 +68,81 @@
     <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
 <script>
-    // 初始清單
+    // 固定的基礎必須清單
     const defaultPacking = {
-        "🪪 必備重要證件": [
-            { name: "台灣駕照正本", note: "自駕靈魂！沒帶取不了車" },
-            { name: "日文駕照譯本", note: "需在監理所事先辦妥" },
-            { name: "護照正本", note: "效期需滿6個月以上" }
+        "🪪 必備重要證件 (漏了絕對出不了關)": [
+            { id: "p1", name: "台灣駕照正本", note: "自駕靈魂！沒帶取不了車" },
+            { id: "p2", name: "日文駕照譯本", note: "需在監理所事先辦妥" },
+            { id: "p3", name: "護照正本", note: "效期需滿6個月以上" },
+            { id: "p4", name: "信用卡與日圓現金", note: "OTS租車與小吃攤必備" }
         ],
         "🚗 自駕與數位裝備": [
-            { name: "手機車用支架", note: "看地圖必備" },
-            { name: "隨身 Wi-Fi 或 eSIM", note: "自駕查路絕不能中斷" }
+            { id: "p5", name: "手機車用支架", note: "看 Google Maps 超方便" },
+            { id: "p6", name: "車充 / USB 充電線", note: "自駕導航手機必備補血" },
+            { id: "p7", name: "隨身 Wi-Fi 或 eSIM", note: "自駕路網不能斷" },
+            { id: "p8", name: "行動電源", note: "海灘拍照一整天必備" }
         ],
-        "🏊‍♂️ 沖繩海灘與水上活動": [
-            { name: "泳衣物 / 水母衣", note: "青之洞窟浮潛" },
-            { name: "海洋友善防曬乳", note: "保護美麗珊瑚礁" }
+        "🏊‍♂️ 沖繩海灘與水水上活動": [
+            { id: "p9", name: "泳衣 / 泳褲 / 水母衣", note: "青之洞窟浮潛必備" },
+            { id: "p10", name: "防水袋 / 手機防水殼", note: "海邊戲水防沙防海水" },
+            { id: "p11", name: "海洋友善防曬乳", note: "保護沖繩美麗的珊瑚礁" },
+            { id: "p12", name: "大毛巾 / 海灘拖鞋", note: "古宇利島踩水上岸擦拭" }
         ]
     };
 
-    // 如果 localStorage 沒有資料，就拿預設資料初始化
-    let currentPackingData = JSON.parse(localStorage.getItem('okinawa_packing_data')) || defaultPacking;
+    let customPackingList = [];
     let checkedItems = JSON.parse(localStorage.getItem('okinawa_packing_status')) || [];
+
+    window.onload = async () => {
+        await loadCloudPacking();
+        // 實時監聽雲端行李箱變更
+        supabase.channel('packing_realtime').on('postgres_changes', { event: '*', table: 'trip_settings' }, () => {
+            loadCloudPacking();
+        }).subscribe();
+    };
+
+    async function loadCloudPacking() {
+        const { data } = await supabase.from('trip_settings').select('custom_packing').eq('id', 1).single();
+        if (data && data.custom_packing) {
+            customPackingList = data.custom_packing;
+        }
+        renderList();
+    }
 
     function renderList() {
         const container = document.getElementById('listContainer');
         let html = '';
 
-        for (const [cat, items] of Object.entries(currentPackingData)) {
-            if(items.length === 0) continue;
-            html += `<div class="cat-card"><div class="cat-title">${cat}</div>`;
-            items.forEach((item, idx) => {
+        // 深度複製基礎清單結構
+        let displayData = JSON.parse(JSON.stringify(defaultPacking));
+        
+        // 將雲端自訂物品按分類塞入
+        customPackingList.forEach(item => {
+            if (displayData[item.cat]) {
+                displayData[item.cat].push(item);
+            } else {
+                // 防呆：如果分類對不上，統一塞入水上活動
+                displayData["🏊‍♂️ 沖繩海灘與水水上活動"].push(item);
+            }
+        });
+
+        for (const [cat, items] of Object.entries(displayData)) {
+            // 修正分類顯示字樣，使其符合設計
+            let displayCatTitle = cat;
+            if(cat === "🏊‍♂️ 沖繩海灘與水水上活動") displayCatTitle = "🏊‍♂️ 沖繩海灘與水上活動";
+
+            html += `<div class="cat-card"><div class="cat-title">${displayCatTitle}</div>`;
+            items.forEach(item => {
                 const isChecked = checkedItems.includes(item.name);
+                const isCustom = item.id && item.id.toString().startsWith('c_');
+                const delBtn = isCustom ? `<button class="btn-item-del" onclick="deleteItem('${item.id}', event)">❌ 刪除</button>` : '';
+
                 html += `
                     <div class="item-row ${isChecked ? 'checked' : ''}" onclick="toggleItem('${item.name}')">
                         <div class="checkbox-custom"></div>
                         <div class="item-name">${item.name}</div>
                         <div class="item-note">${item.note || ''}</div>
-                        <button class="btn-item-del" onclick="deleteItem('${cat}', ${idx}, event)"><i class="fas fa-trash-alt"></i></button>
+                        ${delBtn}
                     </div>`;
             });
             html += `</div>`;
@@ -102,26 +150,44 @@
         container.innerHTML = html;
     }
 
-    function addItem() {
+    async function addItem() {
         const name = document.getElementById('itemName').value.trim();
         if(!name) return alert('請輸入物品名稱！');
         const cat = document.getElementById('itemCat').value;
 
-        if(!currentPackingData[cat]) currentPackingData[cat] = [];
-        currentPackingData[cat].push({ name: name, note: "自訂項目" });
+        const newItem = {
+            id: "c_" + Date.now(),
+            name: name,
+            cat: cat,
+            note: "自訂新增"
+        };
+
+        customPackingList.push(newItem);
         
-        localStorage.setItem('okinawa_packing_data', JSON.stringify(currentPackingData));
-        document.getElementById('itemName').value = '';
-        renderList();
+        // 同步推送至 Supabase 雲端
+        const { error } = await supabase.from('trip_settings').upsert({ id: 1, custom_packing: customPackingList });
+        if(!error) {
+            document.getElementById('itemName').value = '';
+            renderList();
+        } else {
+            alert('同步至雲端失敗：' + error.message);
+        }
     }
 
-    function deleteItem(cat, idx, e) {
-        e.stopPropagation(); // 防止觸發打勾事件
-        if(confirm('確定要刪除這個物品嗎？')) {
-            const removed = currentPackingData[cat].splice(idx, 1);
-            checkedItems = checkedItems.filter(i => i !== removed[0].name); // 同步把打勾紀錄移除
-            localStorage.setItem('okinawa_packing_data', JSON.stringify(currentPackingData));
-            localStorage.setItem('okinawa_packing_status', JSON.stringify(checkedItems));
+    async function deleteItem(id, e) {
+        e.preventDefault();
+        e.stopPropagation(); // 阻止觸發打勾事件
+        
+        if(confirm('確定要從雲端刪除此物品嗎？全員的清單都會同步移除喔！')) {
+            const removedItem = customPackingList.find(i => i.id === id);
+            customPackingList = customPackingList.filter(i => i.id !== id);
+            
+            if(removedItem) {
+                checkedItems = checkedItems.filter(i => i !== removedItem.name);
+                localStorage.setItem('okinawa_packing_status', JSON.stringify(checkedItems));
+            }
+
+            await supabase.from('trip_settings').upsert({ id: 1, custom_packing: customPackingList });
             renderList();
         }
     }
@@ -135,8 +201,6 @@
         localStorage.setItem('okinawa_packing_status', JSON.stringify(checkedItems));
         renderList();
     }
-
-    renderList();
 </script>
 </body>
 </html>
