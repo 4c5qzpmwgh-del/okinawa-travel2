@@ -3,7 +3,6 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // 初始化 Supabase
         const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -15,39 +14,44 @@
     <style>
         :root {
             --primary: #D32F2F; --secondary: #FFC107; --bg: #F4F6F8;
-            --white: #FFFFFF; --text: #333; --light-text: #666;
-            --star: #FFD700;
+            --white: #FFFFFF; --text: #333; --light-text: #666; --star: #FFD700;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; }
         body { background-color: #e0e5ec; display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; padding-bottom: 30px; }
+        .app-container { width: 100%; max-width: 480px; background-color: var(--bg); min-height: 100vh; position: relative; padding-bottom: 30px; }
         header { background: linear-gradient(135deg, var(--primary), #b71c1c); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
         header h1 { font-size: 22px; margin-bottom: 5px; }
-        .controls { padding: 15px; background: white; margin: -10px 15px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .controls, .add-form-card { padding: 15px; background: white; margin: -10px 15px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .add-form-card { margin-top: 15px; background: #fffdeb; border: 1px dashed var(--primary); }
+        .form-title { font-size: 14px; font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+        .form-input.full { grid-column: span 2; }
+        .btn-add { width: 100%; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
         .filter-row { display: flex; gap: 10px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .filter-row::-webkit-scrollbar { display: none; }
         .chip { padding: 6px 15px; background: #eee; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .sort-select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; outline: none; background: #f9f9f9; }
+        .sort-select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; background: #f9f9f9; }
         .food-list { padding: 0 15px; }
         .food-card { background: var(--white); border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; gap: 15px; position: relative; transition: 0.3s; border-left: 5px solid transparent; cursor: pointer; text-decoration: none; color: inherit; }
-        .food-card:active { transform: scale(0.98); background: #fafafa; }
         .food-card.遊客推薦 { border-left-color: #2196F3; }
         .food-card.當地人推薦 { border-left-color: #4CAF50; }
         .food-card.評價推薦 { border-left-color: #FF9800; }
+        .food-card.自訂新增 { border-left-color: #8b5cf6; }
         .food-info { flex: 1; }
-        .food-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .food-header { display: flex; justify-content: space-between; align-items: flex-start; padding-right: 40px; }
         .food-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 5px; }
         .tag-遊客 { background: #E3F2FD; color: #1976D2; }
         .tag-當地 { background: #E8F5E9; color: #2E7D32; }
         .tag-評價 { background: #FFF3E0; color: #E65100; }
-        .star-rating { color: var(--star); font-size: 11px; margin-left: 5px; font-weight: bold; }
+        .tag-自訂 { background: #F3E8FF; color: #6b21a8; }
+        .btn-card-del { position: absolute; top: 12px; right: 12px; background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; z-index: 10; }
         .food-name { font-size: 16px; font-weight: bold; color: var(--text); margin-bottom: 4px; }
         .food-desc { font-size: 12px; color: var(--light-text); line-height: 1.4; margin-bottom: 8px; }
         .food-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0; padding-top: 8px; }
         .food-price { color: var(--primary); font-weight: bold; font-size: 14px; }
         .food-loc { font-size: 11px; color: #999; }
-        .map-hint { font-size: 10px; color: #aaa; text-align: center; margin-top: 10px; }
         .back-home { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: white; width: 50px; height: 50px; border-radius: 25px; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
     </style>
 </head>
@@ -57,6 +61,25 @@
         <h1><i class="fas fa-utensils"></i> 沖繩美食推薦魔法師</h1>
         <p>點擊餐廳卡片可開啟 Google Maps 導航</p>
     </header>
+
+    <!-- 新增自訂美食區塊 -->
+    <div class="add-form-card">
+        <div class="form-title"><i class="fas fa-plus-circle"></i> 自由新增想吃的美食餐廳</div>
+        <div class="form-grid">
+            <input type="text" id="addName" class="form-input" placeholder="餐廳名稱 (必填)">
+            <input type="text" id="addArea" class="form-input" placeholder="地區 (例如: 那霸市)">
+            <input type="number" id="addPrice" class="form-input" placeholder="價位 JPY (例如: 1500)">
+            <select id="addType" class="form-input">
+                <option value="阿古豬與肉類">阿古豬/石垣牛</option>
+                <option value="沖繩麵與在地">沖繩麵/海鮮</option>
+                <option value="海景甜點咖啡">海景/甜點</option>
+            </select>
+            <input type="text" id="addDesc" class="form-input full" placeholder="美味特色簡述">
+            <input type="text" id="addMapUrl" class="form-input full" placeholder="🔗 貼上 Google 地圖網址 (選填)">
+        </div>
+        <button class="btn-add" onclick="customAddFood()">✨ 確認新增至美食清單</button>
+    </div>
+
     <div class="controls">
         <div class="filter-row" id="filterRow">
             <div class="chip active" onclick="filterCat('全部')">全部</div>
@@ -71,21 +94,62 @@
         </select>
     </div>
     <div class="food-list" id="foodList"></div>
-    <div class="map-hint">💡 點擊上方任何餐廳可直接開啟 Google 地圖導航</div>
     <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
 <script>
-    const foodDB = [
-        { name: "百年古家 大家", type: "阿古豬與肉類", cat: "遊客推薦", area: "名護市", price: 3500, desc: "在百年琉球古民家裡享受頂級阿古豬涮涮鍋，氣氛滿分", weight: 1, star: "" },
-        { name: "燒肉 Motobu牧場", type: "阿古豬與肉類", cat: "評價推薦", area: "本部町", price: 6000, desc: "沖繩本部牛頂級燒肉，肉質鮮嫩多汁，在地高分首選", weight: 2, star: "★★★★★" },
-        { name: "琉球新麵 通堂", type: "沖繩麵與在地", cat: "遊客推薦", area: "那霸市", price: 1000, desc: "經典招牌男人麵（濃郁豚骨）與女人麵（清爽鹽味）", weight: 1, star: "" },
-        { name: "幸福鬆餅 瀨長島店", type: "海景甜點咖啡", cat: "遊客推薦", area: "豐見城市", price: 1600, desc: "瀨長島純白希臘風建築，邊看海景邊吃極致蓬鬆鬆餅", weight: 1, star: "" },
-        { name: "岸本食堂 きしもと食堂", type: "沖繩麵與在地", cat: "當地人推薦", area: "本部町", price: 800, desc: "百年木炭傳統製法沖繩麵，手擀麵條極具嚼勁", weight: 3, star: "" },
-        { name: "蝦蝦飯 Kouri Shrimp", type: "沖繩麵與在地", cat: "評價推薦", area: "古宇利島", price: 1500, desc: "古宇利島爆紅夏威夷蒜香蝦飯，搭上海景超級對味", weight: 2, star: "★★★★☆" },
-        { name: "Blue Seal 牧港本店", type: "海景甜點咖啡", cat: "遊客推薦", area: "浦添市", price: 500, desc: "沖繩美式復古風冰淇淋，必吃紅芋與鹽屋雪鹽口味", weight: 1, star: "" },
-        { name: "港川外人住宅 榮町市場居酒屋", type: "沖繩麵與在地", cat: "當地人推薦", area: "浦添市/那霸", price: 2500, desc: "深夜體驗沖繩在地Orion生啤酒與傳統炒苦瓜、海葡萄", weight: 3, star: "" }
+    // 預設核心基礎資料
+    const defaultFoodDB = [
+        { id: "d1", name: "百年古家 大家", type: "阿古豬與肉類", cat: "遊客推薦", area: "名護市", price: 3500, desc: "在百年琉球古民家裡享受頂級阿古豬涮涮鍋，氣氛滿分", weight: 1, mapUrl: "" },
+        { id: "d2", name: "燒肉 Motobu牧場", type: "阿古豬與肉類", cat: "評價推薦", area: "本部町", price: 6000, desc: "沖繩本部牛頂級燒肉，肉質鮮嫩多汁，在地高分首選", weight: 2, mapUrl: "" },
+        { id: "d3", name: "琉球新麵 通堂", type: "沖繩麵與在地", cat: "遊客推薦", area: "那霸市", price: 1000, desc: "經典招牌男人麵（濃郁豚骨）與女人麵（清爽鹽味）", weight: 1, mapUrl: "" },
+        { id: "d4", name: "幸福鬆餅 瀨長島店", type: "海景甜點咖啡", cat: "遊客推薦", area: "豐見城市", price: 1600, desc: "瀨長島純白希臘風建築，邊看海景邊吃極致蓬鬆鬆餅", weight: 1, mapUrl: "" },
+        { id: "d5", name: "岸本食堂 きしもと食堂", type: "沖繩麵與在地", cat: "當地人推薦", area: "本部町", price: 800, desc: "百年木炭傳統製法沖繩麵，手擀麵條極具嚼勁", weight: 3, mapUrl: "" },
+        { id: "d6", name: "蝦蝦飯 Kouri Shrimp", type: "沖繩麵與在地", cat: "評價推薦", area: "古宇利島", price: 1500, desc: "古宇利島爆紅夏威夷蒜香蝦飯，搭上海景超級對味", weight: 2, mapUrl: "" }
     ];
+
+    // 從本地快取加載用戶自訂的美食，避免重新整理後消失
+    let customFoodDB = JSON.parse(localStorage.getItem('okinawa_custom_food')) || [];
     let currentCat = '全部';
+
+    function customAddFood() {
+        const name = document.getElementById('addName').value.trim();
+        if(!name) return alert('請輸入餐廳名稱！');
+        
+        const newFood = {
+            id: "custom_" + Date.now(),
+            name: name,
+            type: document.getElementById('addType').value,
+            cat: "自訂新增",
+            area: document.getElementById('addArea').value.trim() || "沖繩",
+            price: parseInt(document.getElementById('addPrice').value) || 0,
+            desc: document.getElementById('addDesc').value.trim() || "自訂加入的私房口袋名單",
+            weight: 0,
+            mapUrl: document.getElementById('addMapUrl').value.trim()
+        };
+
+        customFoodDB.push(newFood);
+        localStorage.setItem('okinawa_custom_food', JSON.stringify(customFoodDB));
+        
+        // 清空輸入框
+        document.getElementById('addName').value = '';
+        document.getElementById('addArea').value = '';
+        document.getElementById('addPrice').value = '';
+        document.getElementById('addDesc').value = '';
+        document.getElementById('addMapUrl').value = '';
+
+        renderFood();
+    }
+
+    function deleteFood(id, e) {
+        e.preventDefault();
+        e.stopPropagation(); // 防止觸發卡片點擊事件
+        if(confirm('確定要刪除此項目嗎？')) {
+            customFoodDB = customFoodDB.filter(item => item.id !== id);
+            localStorage.setItem('okinawa_custom_food', JSON.stringify(customFoodDB));
+            renderFood();
+        }
+    }
+
     function filterCat(cat) {
         currentCat = cat;
         const chips = document.querySelectorAll('.chip');
@@ -96,24 +160,33 @@
         if(cat === '全部') chips[0].classList.add('active');
         renderFood();
     }
+
     function renderFood() {
         const listEl = document.getElementById('foodList');
         const sortBy = document.getElementById('sortSelect').value;
-        let filtered = foodDB.filter(item => currentCat === '全部' || item.type === currentCat);
+        
+        // 合併預設與用戶自訂資料
+        let fullDB = [...defaultFoodDB, ...customFoodDB];
+        let filtered = fullDB.filter(item => currentCat === '全部' || item.type === currentCat);
+
         filtered.sort((a, b) => {
             if(sortBy === 'popularity') return b.weight - a.weight;
             if(sortBy === 'price_low') return a.price - b.price;
             if(sortBy === 'price_high') return b.price - a.price;
         });
+
         listEl.innerHTML = filtered.map(item => {
-            const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 沖繩')}`;
-            const starHtml = item.cat === "評價推薦" ? `<span class="star-rating">${item.star}</span>` : "";
+            // 如果用戶有填寫專屬網址就用專屬網址，沒有就自動產生搜尋連結
+            const targetUrl = item.mapUrl ? item.mapUrl : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 沖繩')}`;
+            const isCustom = item.id.toString().startsWith('custom_');
+            const delBtnHtml = isCustom ? `<button class="btn-card-del" onclick="deleteFood('${item.id}', event)">❌ 刪除</button>` : '';
+
             return `
-                <a href="${googleMapUrl}" target="_blank" class="food-card ${item.cat}">
+                <a href="${targetUrl}" target="_blank" class="food-card ${item.cat}">
+                    ${delBtnHtml}
                     <div class="food-info">
                         <div class="food-header">
                             <span class="food-tag tag-${item.cat.substring(0,2)}">${item.cat}</span>
-                            ${starHtml}
                         </div>
                         <div class="food-name">${item.name}</div>
                         <div class="food-desc">${item.desc}</div>
@@ -126,6 +199,7 @@
             `;
         }).join('');
     }
+
     renderFood();
 </script>
 </body>
