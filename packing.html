@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // 初始化 Supabase 連線
+        // 1. 初始化 Supabase 連線（統一使用變數名稱：supabase）
         const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7'; 
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -50,17 +50,16 @@
         <p>自駕必備、浮潛防曬裝備智慧檢查清單</p>
     </header>
 
-    <!-- 自由新增行李項目輸入欄位 -->
+    <!-- 自由新增行李項目輸入欄位 (校正錯字後的選單值) -->
     <div class="add-box-card">
         <div class="form-title"><i class="fas fa-plus-circle"></i> 新增自訂物品至指定清單</div>
         <div class="form-grid">
             <input type="text" id="itemName" placeholder="例如：萬用插頭、行動電源...">
-            <!-- ✅ 請換成這段完全校正後的選單 -->
-    <select id="itemCat">
-        <option value="🪪 必備重要證件 (漏了絕對出不了關)">重要證件</option>
-        <option value="🚗 自駕與數位裝備">數位裝備</option>
-        <option value="🏊‍♂️ 沖繩海灘與水上活動">水上活動</option>
-    </select>
+            <select id="itemCat">
+                <option value="🪪 必備重要證件 (漏了絕對出不了關)">重要證件</option>
+                <option value="🚗 自駕與數位裝備">數位裝備</option>
+                <option value="🏊‍♂️ 沖繩海灘與水上活動">水上活動</option>
+            </select>
             <button class="btn-form-add" onclick="addItem()">新增</button>
         </div>
     </div>
@@ -69,7 +68,7 @@
     <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
 <script>
-    // 📍 固定的基礎必須清單（關西/關東文字已徹底清空，完美保留沖繩自駕內容）
+    // 固定的基礎必須清單
     const defaultPacking = {
         "🪪 必備重要證件 (漏了絕對出不了關)": [
             { id: "p1", name: "台灣駕照正本", note: "自駕靈魂！沒帶取不了車" },
@@ -94,6 +93,7 @@
     let customPackingList = [];
     let checkedItems = JSON.parse(localStorage.getItem('okinawa_packing_status')) || [];
 
+    // 2. 網頁加載時執行
     window.onload = async () => {
         await loadCloudPacking();
         
@@ -106,14 +106,12 @@
     async function loadCloudPacking() {
         try {
             const { data, error } = await supabase.from('trip_settings').select('custom_packing').eq('id', 1).single();
-            // 防呆：如果雲端回傳成功且有資料，就用雲端的；沒有的話就維持空陣列，絕對不卡死網頁
             if (data && data.custom_packing) {
                 customPackingList = data.custom_packing;
             } else {
                 customPackingList = [];
             }
         } catch (e) {
-            console.log("Supabase 尚未初始化該欄位，使用預設狀態加載");
             customPackingList = [];
         }
         renderList();
@@ -124,10 +122,8 @@
         if (!container) return;
         let html = '';
 
-        // 深度複製基礎清單結構
         let displayData = JSON.parse(JSON.stringify(defaultPacking));
         
-        // 將雲端自訂物品按分類塞入
         if (Array.isArray(customPackingList)) {
             customPackingList.forEach(item => {
                 if (displayData[item.cat]) {
@@ -139,11 +135,7 @@
         }
 
         for (const [cat, items] of Object.entries(displayData)) {
-            // 修正分類顯示字樣，使其符合原先設計
-            let displayCatTitle = cat;
-            if(cat === "🏊‍♂️ 沖繩海灘與水上活動") displayCatTitle = "🏊‍♂️ 沖繩海灘與水上活動";
-
-            html += `<div class="cat-card"><div class="cat-title">${displayCatTitle}</div>`;
+            html += `<div class="cat-card"><div class="cat-title">${cat}</div>`;
             items.forEach(item => {
                 const isChecked = checkedItems.includes(item.name);
                 const isCustom = item.id && item.id.toString().startsWith('c_');
@@ -177,7 +169,7 @@
         if (!Array.isArray(customPackingList)) customPackingList = [];
         customPackingList.push(newItem);
         
-        // 同步推送至 Supabase 雲端
+        // 3. 推送至雲端 (完全使用正確的變數名稱：supabase)
         const { error } = await supabase.from('trip_settings').upsert({ id: 1, custom_packing: customPackingList });
         if(!error) {
             document.getElementById('itemName').value = '';
@@ -190,7 +182,7 @@
 
     async function deleteItem(id, e) {
         e.preventDefault();
-        e.stopPropagation(); // 阻止觸發打勾事件
+        e.stopPropagation(); 
         
         if(confirm('確定要從雲端刪除此物品嗎？全員的清單都會同步移除喔！')) {
             const removedItem = customPackingList.find(i => i.id === id);
