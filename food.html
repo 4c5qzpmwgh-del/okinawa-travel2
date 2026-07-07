@@ -3,10 +3,10 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // 1. 初始化 Supabase 連線 (全網頁統一使用小寫變數：supabase)
+        // 1. 正確的初始化方式 (將產生的 Client 實體指定給全球變態變數 sb)
         const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,7 +77,7 @@
             <input type="text" id="addDesc" class="form-input full" placeholder="美味特色簡述">
             <input type="text" id="addMapUrl" class="form-input full" placeholder="🔗 貼上 Google 地圖網址 (選填)">
         </div>
-        <button class="btn-add" onclick="customAddFood()"><i class="fas fa-plus"></i> 確認新增至美食清單</button>
+        <button class="btn-add" onclick="customAddFood()"><i class="fas fa-magic"></i> 確認新增至美食清單</button>
     </div>
 
     <div class="controls">
@@ -99,7 +99,7 @@
 </div>
 
 <script>
-    // 2. 預設的核心沖繩特色名店資料庫
+    // 預設核心基礎沖繩特色餐廳
     const defaultFoodDB = [
         { id: "d1", name: "百年古家 大家", type: "阿古豬與肉類", cat: "遊客推薦", area: "名護市", price: 3500, desc: "在百年琉球古民家裡享受頂級阿古豬涮涮鍋，氣氛滿分", weight: 3, mapUrl: "" },
         { id: "d2", name: "燒肉 Motobu牧場", type: "阿古豬與肉類", cat: "評價推薦", area: "本部町", price: 6000, desc: "沖繩本部牛頂級燒肉，肉質鮮嫩多汁，在地高分首選", weight: 2, mapUrl: "" },
@@ -112,19 +112,19 @@
     let customFoodDB = [];
     let currentCat = '全部';
 
-    // 3. 網頁開啟時，自動去雲端抓取大家新增的美食
+    // 2. 網頁開啟載入與監聽
     window.onload = async () => {
         await loadCloudFood();
-        // 啟動實時監聽
-        supabase.channel('food_realtime').on('postgres_changes', { event: '*', table: 'trip_settings' }, () => {
+        // 修正處：使用正確的實體物件 sb 監聽變更
+        sb.channel('food_realtime').on('postgres_changes', { event: '*', table: 'trip_settings' }, () => {
             loadCloudFood();
         }).subscribe();
     };
 
     async function loadCloudFood() {
         try {
-            // 已修正為全小寫 supabase
-            const { data, error } = await supabase.from('trip_settings').select('custom_food').eq('id', 1).maybeSingle();
+            // 修正處：改用正確的 sb.from() 來讀取資料
+            const { data } = await sb.from('trip_settings').select('custom_food').eq('id', 1).maybeSingle();
             if (data && data.custom_food) {
                 customFoodDB = data.custom_food;
             } else {
@@ -136,7 +136,7 @@
         renderFood();
     }
 
-    // 4. 新增自訂美食的核心函數邏輯 (已徹底校正為小寫 supabase.from)
+    // 3. 新增自訂美食函數
     async function customAddFood() {
         try {
             const nameEl = document.getElementById('addName');
@@ -164,11 +164,11 @@
             if (!Array.isArray(customFoodDB)) customFoodDB = [];
             customFoodDB.push(newFood);
             
-            // 修正處：完全對齊為小寫的變數名稱 supabase
-            const { error } = await supabase.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
+            // 修正處：一律改用正確的 sb.from() 做 upsert
+            const { error } = await sb.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
             
             if(error) {
-                alert('❌ Supabase 拒絕寫入！原因：' + JSON.stringify(error));
+                alert('❌ 雲端同步失敗！原因：' + JSON.stringify(error));
             } else {
                 alert('🛍️ 美食已成功同步至雲端，全員即時可見！');
                 nameEl.value = '';
@@ -179,22 +179,22 @@
                 renderFood();
             }
         } catch (err) {
-            alert('🚨 瀏覽器連線被阻斷！錯誤訊息：' + err.message);
+            alert('🚨 瀏覽器拋出未預期錯誤：' + err.message);
         }
     }
 
-    // 5. 雲端自訂美食刪除邏輯
+    // 4. 刪除邏輯
     async function deleteFood(id, e) {
         e.preventDefault(); e.stopPropagation();
         if(confirm('確定要從雲端刪除此項目嗎？（所有人畫面的此項目都會消失喔）')) {
             customFoodDB = customFoodDB.filter(item => item.id !== id);
-            // 修正處：完全對齊為小寫的變數名稱 supabase
-            await supabase.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
+            // 修正處：改用正確的 sb.from()
+            await sb.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
             renderFood();
         }
     }
 
-    // 6. 分類按鈕過濾功能
+    // 5. 分類過濾
     function filterCat(cat) {
         currentCat = cat;
         const chips = document.querySelectorAll('.chip');
@@ -209,7 +209,7 @@
         renderFood();
     }
 
-    // 7. 畫面列表動態渲染與排序邏輯
+    // 6. 動態渲染
     function renderFood() {
         const listEl = document.getElementById('foodList');
         const sortBy = document.getElementById('sortSelect').value;
