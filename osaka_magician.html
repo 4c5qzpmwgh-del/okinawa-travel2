@@ -264,22 +264,39 @@
     }
 
     async function saveToCloud() {
-        const btn = document.getElementById('btnCloud'); btn.innerText = "正在儲存...";
-        await sb.from('saved_itinerary').upsert({ id: '99999999-9999-9999-9999-999999999999', config, selected_spots: Array.from(selectedSet), schedule: scheduledDays });
-        alert("✅ 行程已同步至雲端！"); btn.innerText = "💾 同步到雲端 (存檔)";
+    const btn = document.getElementById('btnCloud');
+    btn.innerText = "正在儲存...";
+    
+    // 改用整數 id: 1 進行覆蓋存檔，避免 UUID 格式衝突被資料庫拒絕
+    const { error } = await sb.from('saved_itinerary').upsert({
+        id: 1, 
+        config: config,
+        selected_spots: Array.from(selectedSet),
+        schedule: scheduledDays
+    });
+    
+    if(!error) {
+        alert("✅ 沖繩行程已完美同步至雲端，旅伴重新整理就看得到囉！");
+    } else {
+        alert("儲存失敗，請檢查資料庫權限：" + error.message);
     }
+    btn.innerText = "💾 同步到雲端 (存檔)";
+}
 
-    async function loadFromCloud() {
-        const { data } = await sb.from('saved_itinerary').select('*').eq('id', '99999999-9999-9999-9999-999999999999').single();
-        if (data) {
-            config = data.config || {};
-            selectedSet = new Set(data.selected_spots);
-            renderSelection();
-            if (data.schedule && data.schedule.length > 0) { scheduledDays = data.schedule; document.getElementById('resultArea').style.display = 'block'; renderResult(); }
+async function loadFromCloud() {
+    // 統一讀取 id: 1 的雲端行程
+    const { data, error } = await sb.from('saved_itinerary').select('*').eq('id', 1).maybeSingle();
+    if (data) {
+        config = data.config || {};
+        selectedSet = new Set(data.selected_spots);
+        renderSelection();
+        if (data.schedule && data.schedule.length > 0) {
+            scheduledDays = data.schedule;
+            document.getElementById('resultArea').style.display = 'block';
+            renderResult();
         }
     }
-
-    window.onload = async () => { renderSelection(); await loadFromCloud(); };
+}
 </script>
 </body>
 </html>
