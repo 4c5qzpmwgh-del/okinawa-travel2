@@ -97,23 +97,23 @@
     <a href="index.html" class="back-home"><i class="fas fa-home"></i></a>
 </div>
 <script>
-    // 預設核心基礎資料
+    // 1. 初始化 Supabase
+    const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 2. 預設的核心美食資料庫
     const defaultFoodDB = [
         { id: "d1", name: "百年古家 大家", type: "阿古豬與肉類", cat: "遊客推薦", area: "名護市", price: 3500, desc: "在百年琉球古民家裡享受頂級阿古豬涮涮鍋，氣氛滿分", weight: 1, mapUrl: "" },
-        { id: "d2", name: "燒肉 Motobu牧場", type: "阿古豬與肉類", cat: "評價推薦", area: "本部町", price: 6000, desc: "沖繩本部牛頂級燒肉，肉質鮮嫩多汁，在地高分首選", weight: 2, mapUrl: "" },
-        { id: "d3", name: "琉球新麵 通堂", type: "沖繩麵與在地", cat: "遊客推薦", area: "那霸市", price: 1000, desc: "經典招牌男人麵（濃郁豚骨）與女人麵（清爽鹽味）", weight: 1, mapUrl: "" },
-        { id: "d4", name: "幸福鬆餅 瀨長島店", type: "海景甜點咖啡", cat: "遊客推薦", area: "豐見城市", price: 1600, desc: "瀨長島純白希臘風建築，邊看海景邊吃極致蓬鬆鬆餅", weight: 1, mapUrl: "" },
-        { id: "d5", name: "岸本食堂 きしもと食堂", type: "沖繩麵與在地", cat: "當地人推薦", area: "本部町", price: 800, desc: "百年木炭傳統製法沖繩麵，手擀麵條極具嚼勁", weight: 3, mapUrl: "" },
-        { id: "d6", name: "蝦蝦飯 Kouri Shrimp", type: "沖繩麵與在地", cat: "評價推薦", area: "古宇利島", price: 1500, desc: "古宇利島爆紅夏威夷蒜香蝦飯，搭上海景超級對味", weight: 2, mapUrl: "" }
+        // ... 其他預設餐廳資料 ...
     ];
 
     let customFoodDB = [];
     let currentCat = '全部';
 
-    // 網頁開啟時，自動去雲端抓取大家新增的美食
+    // 3. 網頁載入與即時監聽
     window.onload = async () => {
         await loadCloudFood();
-        // 啟動即時監聽：旅伴一加，你不用重新整理網頁也會立刻跳出來！
         supabase.channel('food_realtime').on('postgres_changes', { event: '*', table: 'trip_settings' }, () => {
             loadCloudFood();
         }).subscribe();
@@ -127,6 +127,8 @@
         renderFood();
     }
 
+
+    // 📍 填在這裡！【自訂新增美食的函數邏輯】
     async function customAddFood() {
         const name = document.getElementById('addName').value.trim();
         if(!name) return alert('請輸入餐廳名稱！');
@@ -145,10 +147,11 @@
 
         customFoodDB.push(newFood);
         
-        // 儲存上雲端
+        // 儲存上雲端（如果剛剛有去後台關閉 RLS 權限，這裡就能一秒寫入成功！）
         const { error } = await supabase.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
         if(!error) {
-            alert('🛍️ 美食已同步至雲端，全員可見！');
+            alert('🛍️ 美食已成功同步至雲端，全員即時可見！');
+            // 清空輸入框
             document.getElementById('addName').value = '';
             document.getElementById('addArea').value = '';
             document.getElementById('addPrice').value = '';
@@ -156,10 +159,12 @@
             document.getElementById('addMapUrl').value = '';
             renderFood();
         } else {
-            alert('儲存失敗：' + error.message);
+            alert('雲端儲存失敗，請確認 Supabase 的 RLS 是否已關閉：' + error.message);
         }
     }
 
+
+    // 4. 後續的其他函數（刪除、過濾、渲染等）
     async function deleteFood(id, e) {
         e.preventDefault(); e.stopPropagation();
         if(confirm('確定要從雲端刪除此項目嗎？（所有人畫面的此項目都會消失喔）')) {
@@ -170,51 +175,11 @@
     }
 
     function filterCat(cat) {
-        currentCat = cat;
-        const chips = document.querySelectorAll('.chip');
-        chips.forEach(c => {
-            if(c.innerText.includes(cat.substring(0,2))) c.classList.add('active');
-            else c.classList.remove('active');
-        });
-        if(cat === '全部') chips[0].classList.add('active');
-        renderFood();
+        // ... 過濾邏輯 ...
     }
 
     function renderFood() {
-        const listEl = document.getElementById('foodList');
-        const sortBy = document.getElementById('sortSelect').value;
-        
-        let fullDB = [...defaultFoodDB, ...customFoodDB];
-        let filtered = fullDB.filter(item => currentCat === '全部' || item.type === currentCat);
-
-        filtered.sort((a, b) => {
-            if(sortBy === 'popularity') return b.weight - a.weight;
-            if(sortBy === 'price_low') return a.price - b.price;
-            if(sortBy === 'price_high') return b.price - a.price;
-        });
-
-        listEl.innerHTML = filtered.map(item => {
-            const targetUrl = item.mapUrl ? item.mapUrl : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 沖繩')}`;
-            const isCustom = item.id.toString().startsWith('custom_');
-            const delBtnHtml = isCustom ? `<button class="btn-card-del" onclick="deleteFood('${item.id}', event)">❌ 刪除</button>` : '';
-
-            return `
-                <a href="${targetUrl}" target="_blank" class="food-card ${item.cat}">
-                    ${delBtnHtml}
-                    <div class="food-info">
-                        <div class="food-header">
-                            <span class="food-tag tag-${item.cat.substring(0,2)}">${item.cat}</span>
-                        </div>
-                        <div class="food-name">${item.name}</div>
-                        <div class="food-desc">${item.desc}</div>
-                        <div class="food-meta">
-                            <div class="food-price">¥ ${item.price.toLocaleString()} ~</div>
-                            <div class="food-loc"><i class="fas fa-map-marker-alt"></i> ${item.area}</div>
-                        </div>
-                    </div>
-                </a>
-            `;
-        }).join('');
+        // ... 畫面渲染邏輯 ...
     }
 </script>
 </body>
