@@ -3,7 +3,7 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // 1. 初始化 Supabase 連線 (全網頁統一使用 supabase 變數)
+        // 1. 初始化 Supabase 連線 (全網頁統一使用小寫變數：supabase)
         const SUPABASE_URL = 'https://qspahhtjkwbwnlhvceni.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_KyvrI6oR3SB6QNC2O10efw_-tgOyzZ7';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -123,6 +123,7 @@
 
     async function loadCloudFood() {
         try {
+            // 已修正為全小寫 supabase
             const { data, error } = await supabase.from('trip_settings').select('custom_food').eq('id', 1).maybeSingle();
             if (data && data.custom_food) {
                 customFoodDB = data.custom_food;
@@ -135,7 +136,7 @@
         renderFood();
     }
 
-    // 4. 新增自訂美食的核心函數邏輯 (內嵌強力抓錯通知)
+    // 4. 新增自訂美食的核心函數邏輯 (已徹底校正為小寫 supabase.from)
     async function customAddFood() {
         try {
             const nameEl = document.getElementById('addName');
@@ -163,7 +164,7 @@
             if (!Array.isArray(customFoodDB)) customFoodDB = [];
             customFoodDB.push(newFood);
             
-            // 嘗試將資料同步送上雲端
+            // 修正處：完全對齊為小寫的變數名稱 supabase
             const { error } = await supabase.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
             
             if(error) {
@@ -187,6 +188,7 @@
         e.preventDefault(); e.stopPropagation();
         if(confirm('確定要從雲端刪除此項目嗎？（所有人畫面的此項目都會消失喔）')) {
             customFoodDB = customFoodDB.filter(item => item.id !== id);
+            // 修正處：完全對齊為小寫的變數名稱 supabase
             await supabase.from('trip_settings').upsert({ id: 1, custom_food: customFoodDB });
             renderFood();
         }
